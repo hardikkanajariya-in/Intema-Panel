@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\DTOs\DashboardStatsData;
 use App\Models\Client;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ClientService
 {

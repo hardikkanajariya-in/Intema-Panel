@@ -48,7 +48,7 @@ readonly class ClientData
             'notes' => $this->notes,
         ];
 
-        if ($this->databasePassword !== null) {
+        if ($this->databasePassword !== null && $this->databasePassword !== '') {
             $data['database_password_encrypted'] = $this->databasePassword;
         }
 

@@ -1,10 +1,10 @@
-import type { SVGProps } from 'react';
+import type { ReactElement, SVGProps } from 'react';
 
 export type IconProps = SVGProps<SVGSVGElement> & {
     size?: number;
 };
 
-export type LucideIcon = (props: IconProps) => React.ReactElement;
+export type LucideIcon = (props: IconProps) => ReactElement;
 
 function createIcon(path: React.ReactNode): LucideIcon {
     return function Icon({ size = 20, className, ...props }: IconProps) {
