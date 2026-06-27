@@ -9,20 +9,19 @@ import type { ClientFormData, ClientStatus } from '@/types/client';
 
 interface ClientsCreateProps {
     statuses: ClientStatus[];
+    defaultStatus: ClientStatus;
 }
 
-const initialData: ClientFormData = {
-    company_name: '',
-    domain: '',
-    database_name: '',
-    database_user: '',
-    database_password: '',
-    status: 'active',
-    notes: '',
-};
-
-export default function ClientsCreate({ statuses }: ClientsCreateProps) {
-    const { data, setData, post, processing, errors } = useForm<ClientFormData>(initialData);
+export default function ClientsCreate({ statuses, defaultStatus }: ClientsCreateProps) {
+    const { data, setData, post, processing, errors } = useForm<ClientFormData>({
+        company_name: '',
+        domain: '',
+        database_name: '',
+        database_user: '',
+        database_password: '',
+        status: defaultStatus,
+        notes: '',
+    });
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -35,7 +34,7 @@ export default function ClientsCreate({ statuses }: ClientsCreateProps) {
 
             <PageHeader
                 title="Add Client"
-                description="Create a new hosted client project"
+                description="Create a new hosted client with PostgreSQL provisioning"
                 breadcrumbs={[
                     { title: 'Dashboard', href: '/dashboard' },
                     { title: 'Clients', href: '/clients' },

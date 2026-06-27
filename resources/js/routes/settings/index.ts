@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\SettingsController::index
- * @see app/Http/Controllers/SettingsController.php:10
+ * @see app/Http/Controllers/SettingsController.php:19
  * @route '/settings'
  */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\SettingsController::index
- * @see app/Http/Controllers/SettingsController.php:10
+ * @see app/Http/Controllers/SettingsController.php:19
  * @route '/settings'
  */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SettingsController::index
- * @see app/Http/Controllers/SettingsController.php:10
+ * @see app/Http/Controllers/SettingsController.php:19
  * @route '/settings'
  */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\SettingsController::index
- * @see app/Http/Controllers/SettingsController.php:10
+ * @see app/Http/Controllers/SettingsController.php:19
  * @route '/settings'
  */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Http\Controllers\SettingsController::index
- * @see app/Http/Controllers/SettingsController.php:10
+ * @see app/Http/Controllers/SettingsController.php:19
  * @route '/settings'
  */
     const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -54,7 +54,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Http\Controllers\SettingsController::index
- * @see app/Http/Controllers/SettingsController.php:10
+ * @see app/Http/Controllers/SettingsController.php:19
  * @route '/settings'
  */
         indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -63,7 +63,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Http\Controllers\SettingsController::index
- * @see app/Http/Controllers/SettingsController.php:10
+ * @see app/Http/Controllers/SettingsController.php:19
  * @route '/settings'
  */
         indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -77,8 +77,74 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
     
     index.form = indexForm
+/**
+* @see \App\Http\Controllers\SettingsController::update
+ * @see app/Http/Controllers/SettingsController.php:27
+ * @route '/settings'
+ */
+export const update = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: update.url(options),
+    method: 'put',
+})
+
+update.definition = {
+    methods: ["put"],
+    url: '/settings',
+} satisfies RouteDefinition<["put"]>
+
+/**
+* @see \App\Http\Controllers\SettingsController::update
+ * @see app/Http/Controllers/SettingsController.php:27
+ * @route '/settings'
+ */
+update.url = (options?: RouteQueryOptions) => {
+    return update.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\SettingsController::update
+ * @see app/Http/Controllers/SettingsController.php:27
+ * @route '/settings'
+ */
+update.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: update.url(options),
+    method: 'put',
+})
+
+    /**
+* @see \App\Http\Controllers\SettingsController::update
+ * @see app/Http/Controllers/SettingsController.php:27
+ * @route '/settings'
+ */
+    const updateForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: update.url({
+                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                        _method: 'PUT',
+                        ...(options?.query ?? options?.mergeQuery ?? {}),
+                    }
+                }),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\SettingsController::update
+ * @see app/Http/Controllers/SettingsController.php:27
+ * @route '/settings'
+ */
+        updateForm.put = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: update.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'PUT',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'post',
+        })
+    
+    update.form = updateForm
 const settings = {
     index: Object.assign(index, index),
+update: Object.assign(update, update),
 }
 
 export default settings

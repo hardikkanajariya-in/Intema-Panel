@@ -12,7 +12,7 @@ class UpdateClientRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     /**
@@ -26,9 +26,7 @@ class UpdateClientRequest extends FormRequest
         return [
             'company_name' => ['required', 'string', 'max:255'],
             'domain' => ['required', 'string', 'max:255', Rule::unique('clients', 'domain')->ignore($client->id)],
-            'database_name' => ['nullable', 'string', 'max:255'],
-            'database_user' => ['nullable', 'string', 'max:255'],
-            'database_password' => ['nullable', 'string', 'max:255'],
+            'database_password' => ['nullable', 'string', 'min:12', 'max:255'],
             'status' => ['required', Rule::enum(ClientStatus::class)],
             'notes' => ['nullable', 'string', 'max:5000'],
         ];

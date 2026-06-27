@@ -52,6 +52,8 @@ export default function ClientsEdit({ client, statuses }: ClientsEditProps) {
                         setData(field, value);
                     }}
                     isEditing
+                    databaseName={client.database_name}
+                    databaseUser={client.database_user}
                 />
 
                 <div className="flex gap-3">

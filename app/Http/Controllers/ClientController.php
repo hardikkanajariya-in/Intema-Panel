@@ -7,6 +7,7 @@ use App\Actions\DeleteClientAction;
 use App\Actions\UpdateClientAction;
 use App\DTOs\ClientData;
 use App\Enums\ClientStatus;
+use App\Exceptions\PostgresProvisioningException;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
@@ -47,18 +48,26 @@ class ClientController extends Controller
     {
         return Inertia::render('Clients/Create', [
             'statuses' => ClientStatus::values(),
+            'defaultStatus' => (string) setting('default_client_status', config('panel.default_client_status')),
         ]);
     }
 
     public function store(StoreClientRequest $request): RedirectResponse
     {
-        $this->createClientAction->execute(
-            ClientData::fromArray($request->validated()),
-        );
+        try {
+            $this->createClientAction->execute(
+                ClientData::fromArray($request->validated()),
+            );
+        } catch (PostgresProvisioningException $exception) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $exception->getMessage());
+        }
 
         return redirect()
             ->route('clients.index')
-            ->with('success', 'Client created successfully.');
+            ->with('success', 'Client created successfully with PostgreSQL database and user.');
     }
 
     public function show(Client $client): Response

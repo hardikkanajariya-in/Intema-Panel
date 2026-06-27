@@ -4,12 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property string $action
+ * @property int|null $actor_id
+ * @property string $status
  * @property string|null $subject_type
  * @property int|null $subject_id
  * @property string|null $description
@@ -18,6 +21,8 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable([
     'action',
+    'actor_id',
+    'status',
     'subject_type',
     'subject_id',
     'description',
@@ -36,6 +41,14 @@ class ActivityLog extends Model
             'properties' => 'array',
             'created_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function actor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'actor_id');
     }
 
     /**

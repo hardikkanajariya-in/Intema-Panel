@@ -1,10 +1,10 @@
 import type { ClientFormData, ClientStatus } from '@/types/client';
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 
 interface ClientFormProps {
     data: ClientFormData;
@@ -12,9 +12,19 @@ interface ClientFormProps {
     statuses: ClientStatus[];
     onChange: (field: keyof ClientFormData, value: string) => void;
     isEditing?: boolean;
+    databaseName?: string | null;
+    databaseUser?: string | null;
 }
 
-export function ClientForm({ data, errors, statuses, onChange, isEditing = false }: ClientFormProps) {
+export function ClientForm({
+    data,
+    errors,
+    statuses,
+    onChange,
+    isEditing = false,
+    databaseName,
+    databaseUser,
+}: ClientFormProps) {
     return (
         <div className="space-y-6">
             <Card>
@@ -87,55 +97,55 @@ export function ClientForm({ data, errors, statuses, onChange, isEditing = false
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Database Credentials</CardTitle>
-                    <CardDescription>
-                        PostgreSQL connection details (stored encrypted)
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="database_name">Database Name</Label>
-                        <Input
-                            id="database_name"
-                            value={data.database_name}
-                            onChange={(event) => {
-                                onChange('database_name', event.target.value);
-                            }}
-                            error={errors.database_name}
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="database_user">Database User</Label>
-                        <Input
-                            id="database_user"
-                            value={data.database_user}
-                            onChange={(event) => {
-                                onChange('database_user', event.target.value);
-                            }}
-                            error={errors.database_user}
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="database_password">
-                            Database Password
-                            {isEditing ? ' (leave blank to keep current)' : ''}
-                        </Label>
-                        <Input
-                            id="database_password"
-                            type="password"
-                            value={data.database_password}
-                            onChange={(event) => {
-                                onChange('database_password', event.target.value);
-                            }}
-                            error={errors.database_password}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+            {isEditing ? (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Database Credentials</CardTitle>
+                        <CardDescription>
+                            PostgreSQL credentials are provisioned automatically and stored encrypted
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Database Name</Label>
+                            <Input value={databaseName ?? ''} disabled />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Database User</Label>
+                            <Input value={databaseUser ?? ''} disabled />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="database_password">
+                                Reset Database Password (leave blank to keep current)
+                            </Label>
+                            <Input
+                                id="database_password"
+                                type="password"
+                                value={data.database_password}
+                                onChange={(event) => {
+                                    onChange('database_password', event.target.value);
+                                }}
+                                error={errors.database_password}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            ) : (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>PostgreSQL Provisioning</CardTitle>
+                        <CardDescription>
+                            A database, user, and secure password will be created automatically on save
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                            Database identifiers are generated from the company name and configured prefix.
+                            Credentials are encrypted before storage in the panel database.
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     );
 }

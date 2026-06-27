@@ -1,11 +1,14 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/blank-react-starter-kit",
+    "name": "hardikkanajariya/intema-panel",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Open Source Lightweight Hosting Control Panel",
     "keywords": [
         "laravel",
-        "framework"
+        "hosting",
+        "control-panel",
+        "postgresql",
+        "nginx"
     ],
     "license": "MIT",
     "require": {
@@ -32,7 +35,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Support/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

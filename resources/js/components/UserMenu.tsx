@@ -1,14 +1,17 @@
-import { usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { useState } from 'react';
 
 import { LogOut, User } from '@/components/Icons';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
-export function UserMenu() {
-    const { auth } = usePage().props;
+interface UserMenuProps {
+    userName: string;
+    userEmail: string;
+}
+
+export function UserMenu({ userName, userEmail }: UserMenuProps) {
     const [open, setOpen] = useState(false);
-    const user = auth.user;
 
     return (
         <div className="relative">
@@ -22,9 +25,7 @@ export function UserMenu() {
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <User size={16} />
                 </div>
-                <span className="hidden text-sm font-medium sm:inline">
-                    {user?.name ?? 'Administrator'}
-                </span>
+                <span className="hidden text-sm font-medium sm:inline">{userName}</span>
             </Button>
 
             {open ? (
@@ -43,18 +44,15 @@ export function UserMenu() {
                         )}
                     >
                         <div className="border-b border-border px-3 py-2">
-                            <p className="text-sm font-medium text-foreground">
-                                {user?.name ?? 'Administrator'}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                {user?.email ?? 'admin@localhost'}
-                            </p>
+                            <p className="text-sm font-medium text-foreground">{userName}</p>
+                            <p className="text-xs text-muted-foreground">{userEmail}</p>
                         </div>
                         <button
                             type="button"
                             className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                             onClick={() => {
                                 setOpen(false);
+                                router.post('/logout');
                             }}
                         >
                             <LogOut size={16} />

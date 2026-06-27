@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 
-import { X } from '@/components/Icons';
+import { Activity, X } from '@/components/Icons';
 import { isNavItemActive, mainNavigation, secondaryNavigation } from '@/components/navigation';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -11,8 +11,17 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open, onClose }: SidebarProps) {
+    const { panel } = usePage().props;
     const { url } = usePage();
-    const name = usePage().props.name;
+
+    const activityNav = {
+        title: 'Activity Logs',
+        href: '/activity-logs',
+        icon: Activity,
+        routeName: 'activity-logs.index',
+    };
+
+    const bottomNavigation = [...secondaryNavigation, activityNav];
 
     const renderNavItems = (items: typeof mainNavigation) => {
         return items.map((item) => {
@@ -58,31 +67,22 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 <div className="flex h-16 items-center justify-between border-b border-border px-6">
                     <Link href="/dashboard" className="flex items-center gap-2" onClick={onClose}>
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            <span className="text-sm font-bold">HK</span>
+                            <span className="text-sm font-bold">IP</span>
                         </div>
                         <div>
-                            <p className="text-sm font-bold text-foreground">{name}</p>
-                            <p className="text-xs text-muted-foreground">Hosting Manager</p>
+                            <p className="text-sm font-bold text-foreground">{panel.name}</p>
+                            <p className="text-xs text-muted-foreground">{panel.tagline}</p>
                         </div>
                     </Link>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="lg:hidden"
-                        onClick={onClose}
-                    >
+                    <Button variant="ghost" size="icon" className="lg:hidden" onClick={onClose}>
                         <X size={18} />
                     </Button>
                 </div>
 
                 <nav className="flex flex-1 flex-col gap-6 overflow-y-auto p-4">
                     <div className="space-y-1">{renderNavItems(mainNavigation)}</div>
-                    <div className="space-y-1">{renderNavItems(secondaryNavigation)}</div>
+                    <div className="space-y-1">{renderNavItems(bottomNavigation)}</div>
                 </nav>
-
-                <div className="border-t border-border p-4">
-                    <p className="text-xs text-muted-foreground">Internal infrastructure panel</p>
-                </div>
             </aside>
         </>
     );

@@ -1,13 +1,36 @@
 import { Head } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 
-import { Cpu, Database, Globe, HardDrive, MemoryStick, Users } from '@/components/Icons';
+import {
+    Cpu,
+    Database,
+    HardDrive,
+    MemoryStick,
+    Monitor,
+    Server,
+    Shield,
+    Users,
+} from '@/components/Icons';
 import { PageHeader } from '@/components/PageHeader';
+import { Badge } from '@/components/ui/Badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, StatCard } from '@/components/ui/Card';
 import AppLayout from '@/layouts/AppLayout';
 import type { DashboardStats } from '@/types/dashboard';
 
 interface DashboardPageProps {
     stats: DashboardStats;
+}
+
+function statusVariant(status: string): 'success' | 'warning' | 'destructive' | 'secondary' {
+    if (status === 'Running') {
+        return 'success';
+    }
+
+    if (status === 'N/A' || status === 'Unavailable') {
+        return 'secondary';
+    }
+
+    return 'destructive';
 }
 
 export default function DashboardIndex({ stats }: DashboardPageProps) {
@@ -17,7 +40,7 @@ export default function DashboardIndex({ stats }: DashboardPageProps) {
 
             <PageHeader
                 title="Dashboard"
-                description="Overview of your hosting infrastructure"
+                description="Infrastructure overview and system health"
                 breadcrumbs={[{ title: 'Dashboard' }]}
             />
 
@@ -31,19 +54,19 @@ export default function DashboardIndex({ stats }: DashboardPageProps) {
                 <StatCard
                     title="Databases"
                     value={stats.databases}
-                    description="PostgreSQL databases"
+                    description="Provisioned PostgreSQL databases"
                     icon={<Database size={22} />}
                 />
                 <StatCard
-                    title="Domains"
-                    value={stats.domains}
-                    description="Configured domains"
-                    icon={<Globe size={22} />}
+                    title="Server Uptime"
+                    value={stats.uptime}
+                    description="System uptime"
+                    icon={<Monitor size={22} />}
                 />
                 <StatCard
                     title="CPU Usage"
                     value={stats.cpuUsage}
-                    description="Server processor load"
+                    description="Processor utilization"
                     icon={<Cpu size={22} />}
                 />
                 <StatCard
@@ -55,7 +78,7 @@ export default function DashboardIndex({ stats }: DashboardPageProps) {
                 <StatCard
                     title="Disk Usage"
                     value={stats.diskUsage}
-                    description="Storage utilization"
+                    description="Root filesystem usage"
                     icon={<HardDrive size={22} />}
                 />
             </div>
@@ -63,36 +86,66 @@ export default function DashboardIndex({ stats }: DashboardPageProps) {
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Welcome to HK Hosting Manager</CardTitle>
-                        <CardDescription>
-                            Your internal infrastructure management panel
-                        </CardDescription>
+                        <CardTitle>Service Status</CardTitle>
+                        <CardDescription>Core infrastructure services</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                            This panel helps you manage clients, databases, Nginx configurations,
-                            SSL certificates, and Cloudflare settings for your VPS hosting
-                            environment. System metrics will be available in a future release.
-                        </p>
+                    <CardContent className="space-y-3">
+                        <StatusRow label="PostgreSQL" value={stats.postgresqlStatus} icon={<Database size={16} />} />
+                        <StatusRow label="Nginx" value={stats.nginxStatus} icon={<Server size={16} />} />
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Quick Actions</CardTitle>
-                        <CardDescription>Common management tasks</CardDescription>
+                        <CardTitle>Runtime Information</CardTitle>
+                        <CardDescription>Application and server versions</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li>• Add and manage client projects</li>
-                            <li>• Configure database credentials</li>
-                            <li>• Manage Nginx virtual hosts</li>
-                            <li>• Monitor SSL certificate status</li>
-                            <li>• Configure Cloudflare DNS settings</li>
-                        </ul>
+                    <CardContent className="space-y-3">
+                        <InfoRow label="PHP Version" value={stats.phpVersion} icon={<Shield size={16} />} />
+                        <InfoRow label="Laravel Version" value={stats.laravelVersion} icon={<Server size={16} />} />
                     </CardContent>
                 </Card>
             </div>
         </AppLayout>
+    );
+}
+
+function StatusRow({
+    label,
+    value,
+    icon,
+}: {
+    label: string;
+    value: string;
+    icon: ReactNode;
+}) {
+    return (
+        <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {icon}
+                {label}
+            </div>
+            <Badge variant={statusVariant(value)}>{value}</Badge>
+        </div>
+    );
+}
+
+function InfoRow({
+    label,
+    value,
+    icon,
+}: {
+    label: string;
+    value: string;
+    icon: ReactNode;
+}) {
+    return (
+        <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {icon}
+                {label}
+            </div>
+            <span className="text-sm font-medium text-foreground">{value}</span>
+        </div>
     );
 }

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'HK Hosting Manager'),
+    'name' => env('APP_NAME', 'Intema Panel'),
 
     /*
     |--------------------------------------------------------------------------

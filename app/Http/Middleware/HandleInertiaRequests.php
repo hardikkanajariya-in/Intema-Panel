@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\SettingService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,13 +36,26 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        /** @var SettingService $settings */
+        $settings = app(SettingService::class);
+
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => $settings->get('panel_name', config('panel.name')),
+            'panel' => [
+                'name' => $settings->get('panel_name', config('panel.name')),
+                'tagline' => config('panel.tagline'),
+                'company' => $settings->get('company_name', config('panel.company')),
+                'website' => $settings->get('website', config('panel.website')),
+                'github' => $settings->get('github_url', config('panel.github')),
+                'support_email' => $settings->get('support_email', config('panel.support_email')),
+                'version' => config('panel.version'),
+                'license' => config('panel.license'),
+            ],
             'auth' => [
                 'user' => $request->user(),
             ],
-            'appearance' => $request->cookie('appearance', 'system'),
+            'appearance' => $request->cookie('appearance', $settings->get('theme', 'system')),
             'sidebarOpen' => true,
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

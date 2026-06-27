@@ -39,19 +39,11 @@ readonly class ClientData
      */
     public function toArray(): array
     {
-        $data = [
+        return [
             'company_name' => $this->companyName,
             'domain' => $this->domain,
-            'database_name' => $this->databaseName,
-            'database_user' => $this->databaseUser,
             'status' => $this->status,
             'notes' => $this->notes,
         ];
-
-        if ($this->databasePassword !== null && $this->databasePassword !== '') {
-            $data['database_password_encrypted'] = $this->databasePassword;
-        }
-
-        return $data;
     }
 }

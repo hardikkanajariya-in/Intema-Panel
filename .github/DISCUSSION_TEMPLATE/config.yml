@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Support
+    url: https://github.com/hardikkanajariya/intema-panel/blob/main/SUPPORT.md
+    about: Documentation and community support
+  - name: Security
+    url: https://github.com/hardikkanajariya/intema-panel/blob/main/SECURITY.md
+    about: Report a security vulnerability

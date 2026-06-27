@@ -3,3 +3,4 @@ export type * from './client';
 export type * from './dashboard';
 export type * from './navigation';
 export type * from './pagination';
+export type * from './panel';
