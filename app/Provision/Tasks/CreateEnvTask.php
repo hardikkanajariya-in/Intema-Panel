@@ -2,12 +2,11 @@
 
 namespace App\Provision\Tasks;
 
-use App\Provision\Contracts\TaskInterface;
 use App\Provision\Engine\ProvisionContext;
 use App\Provision\Engine\TaskResult;
 use Illuminate\Support\Facades\File;
 
-class CreateEnvTask implements TaskInterface
+class CreateEnvTask extends AbstractTask
 {
     public function name(): string
     {

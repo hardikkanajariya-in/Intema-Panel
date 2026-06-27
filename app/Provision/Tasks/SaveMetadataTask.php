@@ -3,11 +3,10 @@
 namespace App\Provision\Tasks;
 
 use App\Enums\ResourceStatus;
-use App\Provision\Contracts\TaskInterface;
 use App\Provision\Engine\ProvisionContext;
 use App\Provision\Engine\TaskResult;
 
-class SaveMetadataTask implements TaskInterface
+class SaveMetadataTask extends AbstractTask
 {
     public function name(): string
     {

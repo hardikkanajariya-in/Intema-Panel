@@ -28,7 +28,7 @@ class SystemController extends Controller
     {
         $validated = $request->validate([
             'component' => ['required', 'string'],
-            'action' => ['required', 'in:start,stop,restart,reload'],
+            'action' => ['required', 'in:install,update,repair,validate,start,stop,restart,reload'],
         ]);
 
         $this->systemManagerService->performAction(

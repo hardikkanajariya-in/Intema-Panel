@@ -2,12 +2,11 @@
 
 namespace App\Provision\Tasks;
 
-use App\Provision\Contracts\TaskInterface;
 use App\Provision\Engine\ProvisionContext;
 use App\Provision\Engine\TaskResult;
 use App\Services\EncryptionService;
 
-class GeneratePasswordTask implements TaskInterface
+class GeneratePasswordTask extends AbstractTask
 {
     public function __construct(
         private readonly EncryptionService $encryptionService,

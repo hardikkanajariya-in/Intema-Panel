@@ -19,7 +19,7 @@ class DashboardService
     public function __construct(
         private readonly SystemInfoService $systemInfoService,
         private readonly SslService $sslService,
-        private readonly ActivityLogService $activityLogService,
+        private readonly MonitoringService $monitoringService,
     ) {}
 
     public function getStats(): DashboardStatsData
@@ -45,6 +45,8 @@ class DashboardService
             domains: Domain::query()->count(),
             sslCertificates: SslCertificate::query()->count(),
             expiringCertificates: $expiringCerts,
+            deployments: Deployment::query()->count(),
+            loadAverage: $this->monitoringService->loadAverage(),
             uptime: $this->systemInfoService->uptime(),
             cpuUsage: $this->systemInfoService->cpuUsage(),
             ramUsage: $this->systemInfoService->ramUsage(),

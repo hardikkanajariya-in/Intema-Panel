@@ -44,12 +44,20 @@ Route::middleware('setup')->group(function () {
         Route::resource('applications', ApplicationController::class)->only(['index', 'show', 'destroy']);
         Route::post('/applications/{application}/repair', [ApplicationController::class, 'repair'])->name('applications.repair');
         Route::post('/applications/{application}/health', [ApplicationController::class, 'health'])->name('applications.health');
+        Route::post('/applications/{application}/deploy', [ApplicationController::class, 'deploy'])->name('applications.deploy');
+        Route::post('/applications/{application}/runtime', [ApplicationController::class, 'runtime'])->name('applications.runtime');
+        Route::post('/applications/{application}/attach-database', [ApplicationController::class, 'attachDatabase'])->name('applications.attach-database');
+        Route::delete('/applications/{application}/databases/{database}', [ApplicationController::class, 'detachDatabase'])->name('applications.detach-database');
+        Route::post('/applications/{application}/attach-domain', [ApplicationController::class, 'attachDomain'])->name('applications.attach-domain');
+        Route::delete('/applications/{application}/domains/{domain}', [ApplicationController::class, 'detachDomain'])->name('applications.detach-domain');
 
         Route::resource('databases', ManagedDatabaseController::class)->only(['index', 'show', 'destroy']);
         Route::post('/databases/{database}/backup', [ManagedDatabaseController::class, 'backup'])->name('databases.backup');
         Route::post('/databases/{database}/reset-password', [ManagedDatabaseController::class, 'resetPassword'])->name('databases.reset-password');
 
         Route::resource('domains', DomainController::class)->only(['index', 'show', 'destroy']);
+        Route::post('/domains/{domain}/attach-ssl', [DomainController::class, 'attachSsl'])->name('domains.attach-ssl');
+        Route::delete('/domains/{domain}/detach-ssl', [DomainController::class, 'detachSsl'])->name('domains.detach-ssl');
 
         Route::resource('ssl-certificates', SslCertificateController::class)->only(['index', 'show', 'destroy']);
         Route::post('/ssl-certificates/{ssl_certificate}/renew', [SslCertificateController::class, 'renew'])->name('ssl-certificates.renew');

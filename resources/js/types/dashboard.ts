@@ -23,6 +23,8 @@ export interface DashboardStats {
     domains: number;
     sslCertificates: number;
     expiringCertificates: number;
+    deployments: number;
+    loadAverage: string;
     uptime: string;
     cpuUsage: string;
     ramUsage: string;

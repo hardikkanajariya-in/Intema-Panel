@@ -42,16 +42,13 @@ export default function SystemIndex({ monitoring, components }: SystemIndexProps
     return (
         <AppLayout>
             <Head title="System" />
-
             <PageHeader title="System" description="Monitoring and service management" breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }, { title: 'System' }]} />
-
             <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard title="CPU" value={monitoring.cpu} icon={<span>CPU</span>} />
                 <StatCard title="RAM" value={monitoring.ram} icon={<span>RAM</span>} />
                 <StatCard title="Disk" value={monitoring.disk} icon={<span>Disk</span>} />
                 <StatCard title="Uptime" value={monitoring.uptime} icon={<span>Up</span>} />
             </div>
-
             <div className="grid gap-6 lg:grid-cols-2">
                 <Card>
                     <CardHeader><CardTitle>Runtime</CardTitle></CardHeader>
@@ -64,7 +61,6 @@ export default function SystemIndex({ monitoring, components }: SystemIndexProps
                         <Row label="Laravel" value={monitoring.laravel} />
                     </CardContent>
                 </Card>
-
                 <Card>
                     <CardHeader><CardTitle>System Components</CardTitle></CardHeader>
                     <CardContent className="p-0">
@@ -85,11 +81,13 @@ export default function SystemIndex({ monitoring, components }: SystemIndexProps
                                         </TableCell>
                                         <TableCell><Badge variant={component.installed ? 'success' : 'secondary'}>{component.status}</Badge></TableCell>
                                         <TableCell className="text-right">
-                                            {component.service ? (
-                                                <div className="flex justify-end gap-1">
-                                                    <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'restart')}>Restart</Button>
-                                                </div>
-                                            ) : '—'}
+                                            <div className="flex flex-wrap justify-end gap-1">
+                                                {!component.installed && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'install')}>Install</Button>}
+                                                {component.installed && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'update')}>Update</Button>}
+                                                {component.installed && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'validate')}>Validate</Button>}
+                                                {component.installed && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'repair')}>Repair</Button>}
+                                                {component.service && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'restart')}>Restart</Button>}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}

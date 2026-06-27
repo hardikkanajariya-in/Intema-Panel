@@ -77,6 +77,12 @@ class ManagedDatabaseController extends Controller
         $this->postgresService->deprovision($database->database_name, $database->database_user);
         $database->delete();
 
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'database.deleted',
+            description: "Database \"{$database->name}\" was deleted.",
+            subject: $database,
+        );
+
         return redirect()
             ->route('databases.index')
             ->with('success', 'Database deleted successfully.');

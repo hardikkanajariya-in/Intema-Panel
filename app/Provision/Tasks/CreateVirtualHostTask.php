@@ -2,12 +2,11 @@
 
 namespace App\Provision\Tasks;
 
-use App\Provision\Contracts\TaskInterface;
 use App\Provision\Engine\ProvisionContext;
 use App\Provision\Engine\TaskResult;
 use App\Services\NginxService;
 
-class CreateVirtualHostTask implements TaskInterface
+class CreateVirtualHostTask extends AbstractTask
 {
     public function __construct(
         private readonly NginxService $nginxService,

@@ -1,8 +1,22 @@
-# Release Notes — v1.0.0
+# Intema Panel 1.0.0
 
-## Intema Panel v1.0.0
+**Release Date:** 2026-06-27  
+**Status:** Production Ready | GitHub Ready | Open Source Ready
 
-**Infrastructure Resource Manager**
+First stable release of Intema Panel, an open-source Infrastructure Resource Manager for managing projects, applications, databases, domains and SSL on native Ubuntu servers.
+
+## Git Tag Metadata
+
+```
+Version:         v1.0.0
+Release Name:    Intema Panel 1.0.0
+Tag Message:     First stable release
+```
+
+```bash
+git tag -a v1.0.0 -m "Intema Panel 1.0.0 - First stable release"
+git push origin v1.0.0
+```
 
 ### Highlights
 

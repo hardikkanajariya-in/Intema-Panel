@@ -11,12 +11,12 @@ fi
 
 cd "${APP_DIR}"
 composer install --no-dev --optimize-autoloader --no-interaction
-npm ci
+npm ci || npm install
 cp -n .env.example .env
 php artisan key:generate --force
 touch database/database.sqlite
 php artisan migrate --force
 chmod +x scripts/*.sh bootstrap/*.sh bin/intema 2>/dev/null || true
-npm run build
+npm run build || pnpm run build
 chown -R www-data:www-data storage bootstrap/cache database
 chmod -R 775 storage bootstrap/cache

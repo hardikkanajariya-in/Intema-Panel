@@ -2,11 +2,10 @@
 
 namespace App\Provision\Tasks;
 
-use App\Provision\Contracts\TaskInterface;
 use App\Provision\Engine\ProvisionContext;
 use App\Provision\Engine\TaskResult;
 
-class HealthCheckTask implements TaskInterface
+class HealthCheckTask extends AbstractTask
 {
     public function name(): string
     {

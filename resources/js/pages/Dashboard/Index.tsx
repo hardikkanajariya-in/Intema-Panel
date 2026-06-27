@@ -64,7 +64,9 @@ export default function DashboardIndex({ stats }: DashboardPageProps) {
                 <StatCard title="Databases" value={stats.databases} description="PostgreSQL databases" icon={<Database size={22} />} />
                 <StatCard title="Domains" value={stats.domains} description="Configured domains" icon={<Globe size={22} />} />
                 <StatCard title="SSL Certificates" value={stats.sslCertificates} description="Managed certificates" icon={<Shield size={22} />} />
-                <StatCard title="Expiring Soon" value={stats.expiringCertificates} description="Certificates expiring within 30 days" icon={<Shield size={22} />} />
+                <StatCard title="Expiring Certs" value={stats.expiringCertificates} description="Within 30 days" icon={<Shield size={22} />} />
+                <StatCard title="Deployments" value={stats.deployments} description="Recorded deployments" icon={<AppWindow size={22} />} />
+                <StatCard title="Load Average" value={stats.loadAverage} description="1, 5, 15 minute load" icon={<Cpu size={22} />} />
                 <StatCard title="Server Uptime" value={stats.uptime} description="System uptime" icon={<Monitor size={22} />} />
                 <StatCard title="CPU Usage" value={stats.cpuUsage} description="Processor utilization" icon={<Cpu size={22} />} />
                 <StatCard title="RAM Usage" value={stats.ramUsage} description="Memory utilization" icon={<MemoryStick size={22} />} />

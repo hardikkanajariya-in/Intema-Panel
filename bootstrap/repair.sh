@@ -14,7 +14,7 @@ php artisan migrate --force
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
-npm run build
+npm run build || pnpm run build
 systemctl restart php8.3-fpm 2>/dev/null || true
 systemctl restart nginx 2>/dev/null || true
 

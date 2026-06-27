@@ -9,5 +9,11 @@ interface TaskInterface
 {
     public function name(): string;
 
+    public function validate(ProvisionContext $context): TaskResult;
+
     public function execute(ProvisionContext $context): TaskResult;
+
+    public function rollback(ProvisionContext $context): TaskResult;
+
+    public function health(ProvisionContext $context): TaskResult;
 }

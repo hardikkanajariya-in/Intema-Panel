@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\DomainController::index
- * @see app/Http/Controllers/DomainController.php:18
+ * @see app/Http/Controllers/DomainController.php:21
  * @route '/domains'
  */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\DomainController::index
- * @see app/Http/Controllers/DomainController.php:18
+ * @see app/Http/Controllers/DomainController.php:21
  * @route '/domains'
  */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\DomainController::index
- * @see app/Http/Controllers/DomainController.php:18
+ * @see app/Http/Controllers/DomainController.php:21
  * @route '/domains'
  */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\DomainController::index
- * @see app/Http/Controllers/DomainController.php:18
+ * @see app/Http/Controllers/DomainController.php:21
  * @route '/domains'
  */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Http\Controllers\DomainController::index
- * @see app/Http/Controllers/DomainController.php:18
+ * @see app/Http/Controllers/DomainController.php:21
  * @route '/domains'
  */
     const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -54,7 +54,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Http\Controllers\DomainController::index
- * @see app/Http/Controllers/DomainController.php:18
+ * @see app/Http/Controllers/DomainController.php:21
  * @route '/domains'
  */
         indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -63,7 +63,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Http\Controllers\DomainController::index
- * @see app/Http/Controllers/DomainController.php:18
+ * @see app/Http/Controllers/DomainController.php:21
  * @route '/domains'
  */
         indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -79,7 +79,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     index.form = indexForm
 /**
 * @see \App\Http\Controllers\DomainController::show
- * @see app/Http/Controllers/DomainController.php:41
+ * @see app/Http/Controllers/DomainController.php:44
  * @route '/domains/{domain}'
  */
 export const show = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -94,7 +94,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\DomainController::show
- * @see app/Http/Controllers/DomainController.php:41
+ * @see app/Http/Controllers/DomainController.php:44
  * @route '/domains/{domain}'
  */
 show.url = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
@@ -127,7 +127,7 @@ show.url = (args: { domain: string | { uuid: string } } | [domain: string | { uu
 
 /**
 * @see \App\Http\Controllers\DomainController::show
- * @see app/Http/Controllers/DomainController.php:41
+ * @see app/Http/Controllers/DomainController.php:44
  * @route '/domains/{domain}'
  */
 show.get = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -136,7 +136,7 @@ show.get = (args: { domain: string | { uuid: string } } | [domain: string | { uu
 })
 /**
 * @see \App\Http\Controllers\DomainController::show
- * @see app/Http/Controllers/DomainController.php:41
+ * @see app/Http/Controllers/DomainController.php:44
  * @route '/domains/{domain}'
  */
 show.head = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -146,7 +146,7 @@ show.head = (args: { domain: string | { uuid: string } } | [domain: string | { u
 
     /**
 * @see \App\Http\Controllers\DomainController::show
- * @see app/Http/Controllers/DomainController.php:41
+ * @see app/Http/Controllers/DomainController.php:44
  * @route '/domains/{domain}'
  */
     const showForm = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -156,7 +156,7 @@ show.head = (args: { domain: string | { uuid: string } } | [domain: string | { u
 
             /**
 * @see \App\Http\Controllers\DomainController::show
- * @see app/Http/Controllers/DomainController.php:41
+ * @see app/Http/Controllers/DomainController.php:44
  * @route '/domains/{domain}'
  */
         showForm.get = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -165,7 +165,7 @@ show.head = (args: { domain: string | { uuid: string } } | [domain: string | { u
         })
             /**
 * @see \App\Http\Controllers\DomainController::show
- * @see app/Http/Controllers/DomainController.php:41
+ * @see app/Http/Controllers/DomainController.php:44
  * @route '/domains/{domain}'
  */
         showForm.head = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -181,7 +181,7 @@ show.head = (args: { domain: string | { uuid: string } } | [domain: string | { u
     show.form = showForm
 /**
 * @see \App\Http\Controllers\DomainController::destroy
- * @see app/Http/Controllers/DomainController.php:52
+ * @see app/Http/Controllers/DomainController.php:97
  * @route '/domains/{domain}'
  */
 export const destroy = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -196,7 +196,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\DomainController::destroy
- * @see app/Http/Controllers/DomainController.php:52
+ * @see app/Http/Controllers/DomainController.php:97
  * @route '/domains/{domain}'
  */
 destroy.url = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
@@ -229,7 +229,7 @@ destroy.url = (args: { domain: string | { uuid: string } } | [domain: string | {
 
 /**
 * @see \App\Http\Controllers\DomainController::destroy
- * @see app/Http/Controllers/DomainController.php:52
+ * @see app/Http/Controllers/DomainController.php:97
  * @route '/domains/{domain}'
  */
 destroy.delete = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -239,7 +239,7 @@ destroy.delete = (args: { domain: string | { uuid: string } } | [domain: string 
 
     /**
 * @see \App\Http\Controllers\DomainController::destroy
- * @see app/Http/Controllers/DomainController.php:52
+ * @see app/Http/Controllers/DomainController.php:97
  * @route '/domains/{domain}'
  */
     const destroyForm = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -254,7 +254,7 @@ destroy.delete = (args: { domain: string | { uuid: string } } | [domain: string 
 
             /**
 * @see \App\Http\Controllers\DomainController::destroy
- * @see app/Http/Controllers/DomainController.php:52
+ * @see app/Http/Controllers/DomainController.php:97
  * @route '/domains/{domain}'
  */
         destroyForm.delete = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -268,10 +268,180 @@ destroy.delete = (args: { domain: string | { uuid: string } } | [domain: string 
         })
     
     destroy.form = destroyForm
+/**
+* @see \App\Http\Controllers\DomainController::attachSsl
+ * @see app/Http/Controllers/DomainController.php:65
+ * @route '/domains/{domain}/attach-ssl'
+ */
+export const attachSsl = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: attachSsl.url(args, options),
+    method: 'post',
+})
+
+attachSsl.definition = {
+    methods: ["post"],
+    url: '/domains/{domain}/attach-ssl',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\DomainController::attachSsl
+ * @see app/Http/Controllers/DomainController.php:65
+ * @route '/domains/{domain}/attach-ssl'
+ */
+attachSsl.url = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { domain: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+            args = { domain: args.uuid }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    domain: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        domain: typeof args.domain === 'object'
+                ? args.domain.uuid
+                : args.domain,
+                }
+
+    return attachSsl.definition.url
+            .replace('{domain}', parsedArgs.domain.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\DomainController::attachSsl
+ * @see app/Http/Controllers/DomainController.php:65
+ * @route '/domains/{domain}/attach-ssl'
+ */
+attachSsl.post = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: attachSsl.url(args, options),
+    method: 'post',
+})
+
+    /**
+* @see \App\Http\Controllers\DomainController::attachSsl
+ * @see app/Http/Controllers/DomainController.php:65
+ * @route '/domains/{domain}/attach-ssl'
+ */
+    const attachSslForm = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: attachSsl.url(args, options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\DomainController::attachSsl
+ * @see app/Http/Controllers/DomainController.php:65
+ * @route '/domains/{domain}/attach-ssl'
+ */
+        attachSslForm.post = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: attachSsl.url(args, options),
+            method: 'post',
+        })
+    
+    attachSsl.form = attachSslForm
+/**
+* @see \App\Http\Controllers\DomainController::detachSsl
+ * @see app/Http/Controllers/DomainController.php:83
+ * @route '/domains/{domain}/detach-ssl'
+ */
+export const detachSsl = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+    url: detachSsl.url(args, options),
+    method: 'delete',
+})
+
+detachSsl.definition = {
+    methods: ["delete"],
+    url: '/domains/{domain}/detach-ssl',
+} satisfies RouteDefinition<["delete"]>
+
+/**
+* @see \App\Http\Controllers\DomainController::detachSsl
+ * @see app/Http/Controllers/DomainController.php:83
+ * @route '/domains/{domain}/detach-ssl'
+ */
+detachSsl.url = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { domain: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+            args = { domain: args.uuid }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    domain: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        domain: typeof args.domain === 'object'
+                ? args.domain.uuid
+                : args.domain,
+                }
+
+    return detachSsl.definition.url
+            .replace('{domain}', parsedArgs.domain.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\DomainController::detachSsl
+ * @see app/Http/Controllers/DomainController.php:83
+ * @route '/domains/{domain}/detach-ssl'
+ */
+detachSsl.delete = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+    url: detachSsl.url(args, options),
+    method: 'delete',
+})
+
+    /**
+* @see \App\Http\Controllers\DomainController::detachSsl
+ * @see app/Http/Controllers/DomainController.php:83
+ * @route '/domains/{domain}/detach-ssl'
+ */
+    const detachSslForm = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: detachSsl.url(args, {
+                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                        _method: 'DELETE',
+                        ...(options?.query ?? options?.mergeQuery ?? {}),
+                    }
+                }),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\DomainController::detachSsl
+ * @see app/Http/Controllers/DomainController.php:83
+ * @route '/domains/{domain}/detach-ssl'
+ */
+        detachSslForm.delete = (args: { domain: string | { uuid: string } } | [domain: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: detachSsl.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'DELETE',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'post',
+        })
+    
+    detachSsl.form = detachSslForm
 const domains = {
     index: Object.assign(index, index),
 show: Object.assign(show, show),
 destroy: Object.assign(destroy, destroy),
+attachSsl: Object.assign(attachSsl, attachSsl),
+detachSsl: Object.assign(detachSsl, detachSsl),
 }
 
 export default domains

@@ -2,13 +2,12 @@
 
 namespace App\Provision\Tasks;
 
-use App\Provision\Contracts\TaskInterface;
 use App\Provision\Engine\ProvisionContext;
 use App\Provision\Engine\TaskResult;
 use App\Services\NginxService;
 use Illuminate\Support\Str;
 
-class EnableSiteTask implements TaskInterface
+class EnableSiteTask extends AbstractTask
 {
     public function __construct(
         private readonly NginxService $nginxService,
