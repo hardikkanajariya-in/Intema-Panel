@@ -25,13 +25,33 @@ Created by [Hardik Kanajariya](https://hardikkanajariya.in).
 - Nginx
 - Linux server (Ubuntu/Debian recommended)
 
-## Quick Install
+## Quick Install (Ubuntu 24.04 LTS)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hardikkanajariya/intema-panel/main/bootstrap/install.sh | sudo bash
+```
+
+Or clone and run:
 
 ```bash
 git clone https://github.com/hardikkanajariya/intema-panel.git
 cd intema-panel
-chmod +x install.sh scripts/*.sh
-./install.sh
+sudo chmod +x bootstrap/install.sh bin/intema scripts/*.sh
+sudo ./bootstrap/install.sh
+```
+
+Open `http://SERVER-IP` and complete the **Setup Wizard**.
+
+## CLI
+
+```bash
+sudo ln -sf /var/www/intema-panel/bin/intema /usr/local/bin/intema
+intema install    # Full server bootstrap
+intema update     # Update panel
+intema doctor     # Health checks
+intema repair     # Fix permissions and rebuild
+intema verify     # Validate installation
+intema uninstall  # Remove build artifacts
 ```
 
 ## Configuration

@@ -20,7 +20,7 @@ return [
 
     'support_email' => env('PANEL_SUPPORT_EMAIL', 'hello@hardikkanajariya.in'),
 
-    'version' => env('PANEL_VERSION', '1.0.0'),
+    'version' => env('PANEL_VERSION', '1.0.0-rc1'),
 
     'license' => 'MIT',
 
@@ -63,5 +63,62 @@ return [
         'timeout' => (int) env('PANEL_SHELL_TIMEOUT', 60),
         'enabled' => env('PANEL_SHELL_ENABLED', true),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nginx
+    |--------------------------------------------------------------------------
+    */
+
+    'nginx' => [
+        'sites_available' => env('PANEL_NGINX_SITES_AVAILABLE', '/etc/nginx/sites-available'),
+        'sites_enabled' => env('PANEL_NGINX_SITES_ENABLED', '/etc/nginx/sites-enabled'),
+        'config_path' => env('PANEL_NGINX_CONFIG', '/etc/nginx/nginx.conf'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SSL / Certbot
+    |--------------------------------------------------------------------------
+    */
+
+    'ssl' => [
+        'certbot_path' => env('PANEL_CERTBOT_PATH', '/usr/bin/certbot'),
+        'email' => env('PANEL_SSL_EMAIL'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | File Manager
+    |--------------------------------------------------------------------------
+    */
+
+    'files' => [
+        'allowed_roots' => [
+            base_path(),
+            storage_path('logs'),
+        ],
+        'editable_files' => [
+            base_path('.env'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Adminer
+    |--------------------------------------------------------------------------
+    */
+
+    'adminer' => [
+        'url' => env('PANEL_ADMINER_URL', '/adminer'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bootstrap
+    |--------------------------------------------------------------------------
+    */
+
+    'install_path' => env('PANEL_INSTALL_PATH', '/var/www/intema-panel'),
 
 ];

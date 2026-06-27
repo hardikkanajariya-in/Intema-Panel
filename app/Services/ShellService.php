@@ -31,7 +31,7 @@ class ShellService
         }
 
         foreach ($arguments as $argument) {
-            if (! is_string($argument) || $argument === '' || str_contains($argument, "\0")) {
+            if (! is_string($argument) || str_contains($argument, "\0")) {
                 throw new InvalidArgumentException('Invalid script argument.');
             }
         }

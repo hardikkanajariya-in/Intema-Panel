@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Middleware\EnsureSetupComplete;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Services\SetupService;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,7 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->redirectGuestsTo('/login');
+        $middleware->redirectGuestsTo(fn () => app(SetupService::class)->isComplete() ? route('login') : route('setup.index'));
+
+        $middleware->alias([
+            'setup' => EnsureSetupComplete::class,
+        ]);
 
         $middleware->web(append: [
             HandleAppearance::class,

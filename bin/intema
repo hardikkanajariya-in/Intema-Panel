@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+case "${1:-}" in
+    install)
+        exec bash "${ROOT_DIR}/bootstrap/install.sh" "${@:2}"
+        ;;
+    update)
+        exec bash "${ROOT_DIR}/bootstrap/update.sh" "${@:2}"
+        ;;
+    doctor)
+        exec bash "${ROOT_DIR}/doctor.sh" "${@:2}"
+        ;;
+    repair)
+        exec bash "${ROOT_DIR}/bootstrap/repair.sh" "${@:2}"
+        ;;
+    uninstall)
+        exec bash "${ROOT_DIR}/uninstall.sh" "${@:2}"
+        ;;
+    verify)
+        exec bash "${ROOT_DIR}/bootstrap/verify.sh" "${@:2}"
+        ;;
+    *)
+        echo "Intema Panel CLI"
+        echo "Usage: intema <install|update|doctor|repair|uninstall|verify>"
+        exit 1
+        ;;
+esac

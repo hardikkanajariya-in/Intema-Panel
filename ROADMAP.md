@@ -1,5 +1,14 @@
 # Roadmap
 
+## RC1 (Current) — Complete
+
+- [x] Bootstrap installer for Ubuntu 24.04 LTS
+- [x] Browser setup wizard
+- [x] System Manager and monitoring
+- [x] PostgreSQL, Nginx, SSL modules
+- [x] File manager (logs + .env)
+- [x] `intema` CLI
+
 ## v1.1 — Infrastructure Modules
 
 - [ ] Nginx virtual host management

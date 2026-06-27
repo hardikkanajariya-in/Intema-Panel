@@ -1,6 +1,7 @@
 import {
     Cloud,
     Database,
+    Folder,
     LayoutDashboard,
     Monitor,
     Server,
@@ -55,6 +56,12 @@ export const secondaryNavigation: NavItem[] = [
         href: '/system',
         icon: Monitor,
         routeName: 'system.index',
+    },
+    {
+        title: 'Files',
+        href: '/files',
+        icon: Folder,
+        routeName: 'files.index',
     },
     {
         title: 'Settings',
