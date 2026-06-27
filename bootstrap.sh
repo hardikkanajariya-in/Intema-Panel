@@ -285,40 +285,74 @@ extract_archive() {
     fi
 }
 
-detect_github_archive_strip() {
+verify_archive_integrity() {
     local archive="$1"
-    local top
-    top="$(tar -tzf "${archive}" | head -1 | cut -d/ -f1)"
-    [[ -n "${top}" ]] || error "Unable to inspect downloaded archive." 3
-    echo "${top}"
-}
 
-download_and_extract_release() {
-    local temp_dir archive checksum target_dir
-    temp_dir="$(mktemp -d)"
-    archive="${temp_dir}/${INTEMA_RELEASE_ASSET}"
-    checksum="${temp_dir}/${INTEMA_CHECKSUM_ASSET}"
-    target_dir="${temp_dir}/extract"
+    log "Verifying archive integrity"
 
-    trap 'rm -rf "${temp_dir}"' RETURN
-
-    download_file "$(release_download_url)" "${archive}"
-
-    if ! download_file "$(release_checksum_url)" "${checksum}" 2>/dev/null; then
-        : >"${checksum}"
+    if ! gzip -t "${archive}" 2>/dev/null; then
+        error "Archive integrity check failed (corrupt gzip)." 4
     fi
 
-    verify_checksum "${archive}" "${checksum}"
+    if ! tar -tzf "${archive}" >/dev/null 2>&1; then
+        error "Archive integrity check failed (invalid tar archive)." 4
+    fi
 
-    if [[ "${INTEMA_ACTION}" == "upgrade" ]] && installation_exists; then
-        log "Upgrading installation at ${INTEMA_INSTALL_DIR}"
-        extract_archive "${archive}" "${target_dir}" 0
+    log "Archive integrity verified."
+}
 
-        local source_dir="${target_dir}"
-        if [[ "$(find "${target_dir}" -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]]; then
-            source_dir="$(find "${target_dir}" -mindepth 1 -maxdepth 1 -type d | head -1)"
+verify_package_contents() {
+    local source_dir="$1"
+
+    if [[ -f "${source_dir}/.env" ]]; then
+        error "Release package must not contain .env (only .env.example is allowed)." 4
+    fi
+
+    if [[ ! -f "${source_dir}/.env.example" ]]; then
+        error "Release package is missing .env.example." 3
+    fi
+
+    if [[ ! -f "${source_dir}/bootstrap/install.sh" ]]; then
+        error "Release package is missing bootstrap/install.sh." 3
+    fi
+
+    log "Package contents verified."
+}
+
+resolve_package_root() {
+    local base_dir="$1"
+    local source_dir="${base_dir}"
+
+    if [[ "$(find "${base_dir}" -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]]; then
+        local nested
+        nested="$(find "${base_dir}" -mindepth 1 -maxdepth 1 -type d | head -1)"
+        if [[ -f "${nested}/bootstrap/install.sh" ]]; then
+            source_dir="${nested}"
         fi
+    fi
 
+    echo "${source_dir}"
+}
+
+cleanup_partial_installation() {
+    if [[ "${INTEMA_ACTION}" == "upgrade" ]] || has_panel_data; then
+        return 0
+    fi
+
+    if [[ -d "${INTEMA_INSTALL_DIR}" ]]; then
+        log "Removing partial installation at ${INTEMA_INSTALL_DIR}"
+        rm -rf "${INTEMA_INSTALL_DIR}"
+    fi
+}
+
+deploy_package() {
+    local source_dir="$1"
+    local is_upgrade="$2"
+
+    verify_package_contents "${source_dir}"
+
+    if [[ "${is_upgrade}" == "true" ]]; then
+        log "Upgrading installation at ${INTEMA_INSTALL_DIR}"
         rsync -a --delete \
             --exclude='.env' \
             --exclude='database/database.sqlite' \
@@ -326,50 +360,97 @@ download_and_extract_release() {
             --exclude='storage/logs/' \
             "${source_dir}/" "${INTEMA_INSTALL_DIR}/"
     else
-        log "Extracting to ${INTEMA_INSTALL_DIR}"
-        mkdir -p "${INTEMA_INSTALL_DIR}"
-        extract_archive "${archive}" "${INTEMA_INSTALL_DIR}" 0
-
-        if [[ "$(find "${INTEMA_INSTALL_DIR}" -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]]; then
-            local nested
-            nested="$(find "${INTEMA_INSTALL_DIR}" -mindepth 1 -maxdepth 1 -type d | head -1)"
-            if [[ -f "${nested}/bootstrap/install.sh" ]]; then
-                shopt -s dotglob
-                mv "${nested}"/* "${INTEMA_INSTALL_DIR}/"
-                rmdir "${nested}" 2>/dev/null || true
-                shopt -u dotglob
-            fi
+        log "Deploying to ${INTEMA_INSTALL_DIR}"
+        if [[ -d "${INTEMA_INSTALL_DIR}" ]] && ! has_panel_data; then
+            rm -rf "${INTEMA_INSTALL_DIR}"
         fi
+        mkdir -p "${INTEMA_INSTALL_DIR}"
+        rsync -a "${source_dir}/" "${INTEMA_INSTALL_DIR}/"
+    fi
+}
+
+download_and_extract_release() {
+    local temp_dir archive checksum staging_dir source_dir is_upgrade=false
+    temp_dir="$(mktemp -d)"
+    archive="${temp_dir}/${INTEMA_RELEASE_ASSET}"
+    checksum="${temp_dir}/${INTEMA_CHECKSUM_ASSET}"
+    staging_dir="${temp_dir}/staging"
+
+    if [[ "${INTEMA_ACTION}" == "upgrade" ]] && installation_exists; then
+        is_upgrade=true
     fi
 
+    cleanup_on_failure() {
+        local exit_code=$?
+        rm -rf "${temp_dir}"
+        if [[ "${exit_code}" -ne 0 ]] && [[ "${is_upgrade}" != "true" ]]; then
+            cleanup_partial_installation
+        fi
+        return "${exit_code}"
+    }
+    trap cleanup_on_failure EXIT
+
+    download_file "$(release_download_url)" "${archive}"
+
+    if ! download_file "$(release_checksum_url)" "${checksum}" 2>/dev/null; then
+        rm -f "${checksum}"
+    fi
+
+    verify_checksum "${archive}" "${checksum}"
+    verify_archive_integrity "${archive}"
+
+    log "Extracting release package"
+    mkdir -p "${staging_dir}"
+    extract_archive "${archive}" "${staging_dir}" 0
+    source_dir="$(resolve_package_root "${staging_dir}")"
+
+    deploy_package "${source_dir}" "${is_upgrade}"
+
+    rm -rf "${temp_dir}"
+    trap - EXIT
+
+    log "Temporary archive removed."
     INTEMA_INSTALL_MODE="${INTEMA_INSTALL_MODE:-production}"
 }
 
 download_and_extract_branch() {
-    local temp_dir archive target_dir top_dir
+    local temp_dir archive staging_dir source_dir is_upgrade=false
     temp_dir="$(mktemp -d)"
     archive="${temp_dir}/branch.tar.gz"
-    target_dir="${temp_dir}/extract"
-
-    trap 'rm -rf "${temp_dir}"' RETURN
-
-    download_file "$(branch_archive_url)" "${archive}"
-
-    top_dir="$(detect_github_archive_strip "${archive}")"
-    mkdir -p "${INTEMA_INSTALL_DIR}"
+    staging_dir="${temp_dir}/staging"
 
     if [[ "${INTEMA_ACTION}" == "upgrade" ]] && installation_exists; then
-        extract_archive "${archive}" "${target_dir}" 1
-        rsync -a --delete \
-            --exclude='.env' \
-            --exclude='database/database.sqlite' \
-            --exclude='storage/app/' \
-            --exclude='storage/logs/' \
-            "${target_dir}/" "${INTEMA_INSTALL_DIR}/"
-    else
-        extract_archive "${archive}" "${INTEMA_INSTALL_DIR}" 1
+        is_upgrade=true
     fi
 
+    cleanup_on_failure() {
+        local exit_code=$?
+        rm -rf "${temp_dir}"
+        if [[ "${exit_code}" -ne 0 ]] && [[ "${is_upgrade}" != "true" ]]; then
+            cleanup_partial_installation
+        fi
+        return "${exit_code}"
+    }
+    trap cleanup_on_failure EXIT
+
+    download_file "$(branch_archive_url)" "${archive}"
+    verify_archive_integrity "${archive}"
+
+    log "Extracting branch archive"
+    mkdir -p "${staging_dir}"
+    extract_archive "${archive}" "${staging_dir}" 1
+    source_dir="$(resolve_package_root "${staging_dir}")"
+
+    if [[ -f "${source_dir}/.env" ]]; then
+        error "Branch archive must not contain .env." 4
+    fi
+
+    deploy_package "${source_dir}" "${is_upgrade}"
+
+    rm -rf "${temp_dir}"
+    trap - EXIT
+
+    log "Temporary archive removed."
     INTEMA_INSTALL_MODE="development"
 }
 
@@ -386,7 +467,13 @@ run_installer() {
     export INTEMA_INSTALL_MODE="${INTEMA_INSTALL_MODE:-production}"
 
     log "Launching installer at ${INTEMA_INSTALL_DIR}/bootstrap/install.sh"
-    bash "${INTEMA_INSTALL_DIR}/bootstrap/install.sh" "${INSTALLER_ARGS[@]}"
+
+    if ! bash "${INTEMA_INSTALL_DIR}/bootstrap/install.sh" "${INSTALLER_ARGS[@]}"; then
+        if [[ "${INTEMA_ACTION}" != "upgrade" ]] && ! has_panel_data; then
+            cleanup_partial_installation
+        fi
+        error "Installer failed." 1
+    fi
 }
 
 run_repair() {

@@ -40,18 +40,10 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm run build
 
-      - name: Optimize Laravel
-        run: |
-          cp .env.example .env
-          php artisan key:generate --force
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-          rm -f .env
-
       - name: Create release archive
         run: |
-          tar -czf intema-panel.tar.gz \
+          STAGING="$(mktemp -d)"
+          rsync -a \
             --exclude=node_modules \
             --exclude=.git \
             --exclude=tests \
@@ -60,10 +52,22 @@ jobs:
             --exclude=.vscode \
             --exclude=storage/logs \
             --exclude=.env \
-            --exclude='storage/framework/cache/data/*' \
-            --exclude='storage/framework/sessions/*' \
-            --exclude='storage/framework/views/*' \
-            .
+            --exclude='bootstrap/cache/*.php' \
+            --exclude='storage/framework/cache/data' \
+            --exclude='storage/framework/sessions' \
+            --exclude='storage/framework/views' \
+            ./ "${STAGING}/intema-panel/"
+
+          for dir in storage/logs storage/framework/cache/data storage/framework/sessions storage/framework/views; do
+            mkdir -p "${STAGING}/intema-panel/${dir}"
+            if [[ -f "${dir}/.gitignore" ]]; then
+              cp "${dir}/.gitignore" "${STAGING}/intema-panel/${dir}/.gitignore"
+            fi
+          done
+
+          tar -czf /tmp/intema-panel.tar.gz -C "${STAGING}" intema-panel
+          mv /tmp/intema-panel.tar.gz intema-panel.tar.gz
+          rm -rf "${STAGING}"
 
       - name: Generate SHA256 checksum
         run: |

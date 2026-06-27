@@ -17,7 +17,7 @@ configure_application() {
     cd "${APP_DIR}"
 
     if [[ ! -f .env ]]; then
-        cp -n .env.example .env
+        cp .env.example .env
     fi
 
     if ! grep -qE '^APP_KEY=base64:' .env 2>/dev/null; then
@@ -30,6 +30,12 @@ configure_application() {
 
     php artisan migrate --force
     php artisan storage:link --force 2>/dev/null || php artisan storage:link 2>/dev/null || true
+
+    php artisan config:clear 2>/dev/null || true
+    php artisan route:clear 2>/dev/null || true
+    php artisan view:clear 2>/dev/null || true
+    rm -f bootstrap/cache/*.php 2>/dev/null || true
+
     php artisan config:cache
     php artisan route:cache
     php artisan view:cache
