@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Select } from '@/components/ui/Select';
 import AppLayout from '@/layouts/AppLayout';
-import type { ClientStatus } from '@/types/client';
 import type { PanelSettings } from '@/types/panel';
 
 interface SettingsIndexProps {
@@ -134,21 +133,20 @@ export default function SettingsIndex({ settings, timezones }: SettingsIndexProp
                             />
                         </Field>
                         <Field
-                            label="Default Client Status"
-                            id="default_client_status"
+                            label="Default Resource Status"
+                            id="default_resource_status"
                             required
-                            error={errors.default_client_status}
+                            error={errors.default_resource_status}
                         >
                             <Select
-                                id="default_client_status"
-                                value={data.default_client_status}
-                                onChange={(e) =>
-                                    setData('default_client_status', e.target.value as ClientStatus)
-                                }
-                                error={errors.default_client_status}
+                                id="default_resource_status"
+                                value={data.default_resource_status}
+                                onChange={(e) => setData('default_resource_status', e.target.value)}
+                                error={errors.default_resource_status}
                             >
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
+                                <option value="pending">Pending</option>
                                 <option value="suspended">Suspended</option>
                             </Select>
                         </Field>

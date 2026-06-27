@@ -13,7 +13,7 @@ import {
     TableRow,
 } from '@/components/ui/Table';
 import AppLayout from '@/layouts/AppLayout';
-import type { ActivityLogEntry } from '@/types/panel';
+import type { ActivityLogEntry } from '@/types/dashboard';
 import type { PaginatedData } from '@/types/pagination';
 
 interface ActivityLogsIndexProps {

@@ -5,7 +5,25 @@ All notable changes to Intema Panel will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0-rc1] - 2026-06-27
+## [1.0.0] - 2026-06-27
+
+### Added
+
+- Resource-based architecture: Projects, Applications, Databases, Domains, SSL Certificates, Deployments
+- Provision Engine with reusable tasks and application-specific provisioners
+- Resource Wizard for guided resource creation
+- Policies, rate limiting, and UUID-based routing for all resources
+- Expanded dashboard with server health, activity, and deployment history
+
+### Changed
+
+- **Breaking:** Removed client-centric model; migrated to independent resources
+- Branding subtitle: Infrastructure Resource Manager
+- Navigation restructured around projects and resources
+
+### Removed
+
+- Client module and Cloudflare placeholder
 
 ### Added
 

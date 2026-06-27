@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
-* @see \App\Http\Controllers\DatabaseController::index
- * @see app/Http/Controllers/DatabaseController.php:20
+* @see \App\Http\Controllers\ManagedDatabaseController::index
+ * @see app/Http/Controllers/ManagedDatabaseController.php:20
  * @route '/databases'
  */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -15,8 +15,8 @@ index.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see \App\Http\Controllers\DatabaseController::index
- * @see app/Http/Controllers/DatabaseController.php:20
+* @see \App\Http\Controllers\ManagedDatabaseController::index
+ * @see app/Http/Controllers/ManagedDatabaseController.php:20
  * @route '/databases'
  */
 index.url = (options?: RouteQueryOptions) => {
@@ -24,8 +24,8 @@ index.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see \App\Http\Controllers\DatabaseController::index
- * @see app/Http/Controllers/DatabaseController.php:20
+* @see \App\Http\Controllers\ManagedDatabaseController::index
+ * @see app/Http/Controllers/ManagedDatabaseController.php:20
  * @route '/databases'
  */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -33,8 +33,8 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     method: 'get',
 })
 /**
-* @see \App\Http\Controllers\DatabaseController::index
- * @see app/Http/Controllers/DatabaseController.php:20
+* @see \App\Http\Controllers\ManagedDatabaseController::index
+ * @see app/Http/Controllers/ManagedDatabaseController.php:20
  * @route '/databases'
  */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -43,8 +43,8 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
     /**
-* @see \App\Http\Controllers\DatabaseController::index
- * @see app/Http/Controllers/DatabaseController.php:20
+* @see \App\Http\Controllers\ManagedDatabaseController::index
+ * @see app/Http/Controllers/ManagedDatabaseController.php:20
  * @route '/databases'
  */
     const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -53,8 +53,8 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     })
 
             /**
-* @see \App\Http\Controllers\DatabaseController::index
- * @see app/Http/Controllers/DatabaseController.php:20
+* @see \App\Http\Controllers\ManagedDatabaseController::index
+ * @see app/Http/Controllers/ManagedDatabaseController.php:20
  * @route '/databases'
  */
         indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -62,8 +62,8 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
             method: 'get',
         })
             /**
-* @see \App\Http\Controllers\DatabaseController::index
- * @see app/Http/Controllers/DatabaseController.php:20
+* @see \App\Http\Controllers\ManagedDatabaseController::index
+ * @see app/Http/Controllers/ManagedDatabaseController.php:20
  * @route '/databases'
  */
         indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -78,158 +78,349 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     
     index.form = indexForm
 /**
-* @see \App\Http\Controllers\DatabaseController::backup
- * @see app/Http/Controllers/DatabaseController.php:29
- * @route '/databases/{client}/backup'
+* @see \App\Http\Controllers\ManagedDatabaseController::show
+ * @see app/Http/Controllers/ManagedDatabaseController.php:43
+ * @route '/databases/{database}'
  */
-export const backup = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const show = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: show.url(args, options),
+    method: 'get',
+})
+
+show.definition = {
+    methods: ["get","head"],
+    url: '/databases/{database}',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\ManagedDatabaseController::show
+ * @see app/Http/Controllers/ManagedDatabaseController.php:43
+ * @route '/databases/{database}'
+ */
+show.url = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { database: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+            args = { database: args.uuid }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    database: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        database: typeof args.database === 'object'
+                ? args.database.uuid
+                : args.database,
+                }
+
+    return show.definition.url
+            .replace('{database}', parsedArgs.database.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\ManagedDatabaseController::show
+ * @see app/Http/Controllers/ManagedDatabaseController.php:43
+ * @route '/databases/{database}'
+ */
+show.get = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: show.url(args, options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\ManagedDatabaseController::show
+ * @see app/Http/Controllers/ManagedDatabaseController.php:43
+ * @route '/databases/{database}'
+ */
+show.head = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: show.url(args, options),
+    method: 'head',
+})
+
+    /**
+* @see \App\Http\Controllers\ManagedDatabaseController::show
+ * @see app/Http/Controllers/ManagedDatabaseController.php:43
+ * @route '/databases/{database}'
+ */
+    const showForm = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: show.url(args, options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\ManagedDatabaseController::show
+ * @see app/Http/Controllers/ManagedDatabaseController.php:43
+ * @route '/databases/{database}'
+ */
+        showForm.get = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: show.url(args, options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\ManagedDatabaseController::show
+ * @see app/Http/Controllers/ManagedDatabaseController.php:43
+ * @route '/databases/{database}'
+ */
+        showForm.head = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: show.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    show.form = showForm
+/**
+* @see \App\Http\Controllers\ManagedDatabaseController::destroy
+ * @see app/Http/Controllers/ManagedDatabaseController.php:73
+ * @route '/databases/{database}'
+ */
+export const destroy = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+    url: destroy.url(args, options),
+    method: 'delete',
+})
+
+destroy.definition = {
+    methods: ["delete"],
+    url: '/databases/{database}',
+} satisfies RouteDefinition<["delete"]>
+
+/**
+* @see \App\Http\Controllers\ManagedDatabaseController::destroy
+ * @see app/Http/Controllers/ManagedDatabaseController.php:73
+ * @route '/databases/{database}'
+ */
+destroy.url = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { database: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+            args = { database: args.uuid }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    database: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        database: typeof args.database === 'object'
+                ? args.database.uuid
+                : args.database,
+                }
+
+    return destroy.definition.url
+            .replace('{database}', parsedArgs.database.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\ManagedDatabaseController::destroy
+ * @see app/Http/Controllers/ManagedDatabaseController.php:73
+ * @route '/databases/{database}'
+ */
+destroy.delete = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+    url: destroy.url(args, options),
+    method: 'delete',
+})
+
+    /**
+* @see \App\Http\Controllers\ManagedDatabaseController::destroy
+ * @see app/Http/Controllers/ManagedDatabaseController.php:73
+ * @route '/databases/{database}'
+ */
+    const destroyForm = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: destroy.url(args, {
+                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                        _method: 'DELETE',
+                        ...(options?.query ?? options?.mergeQuery ?? {}),
+                    }
+                }),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\ManagedDatabaseController::destroy
+ * @see app/Http/Controllers/ManagedDatabaseController.php:73
+ * @route '/databases/{database}'
+ */
+        destroyForm.delete = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: destroy.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'DELETE',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'post',
+        })
+    
+    destroy.form = destroyForm
+/**
+* @see \App\Http\Controllers\ManagedDatabaseController::backup
+ * @see app/Http/Controllers/ManagedDatabaseController.php:54
+ * @route '/databases/{database}/backup'
+ */
+export const backup = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: backup.url(args, options),
     method: 'post',
 })
 
 backup.definition = {
     methods: ["post"],
-    url: '/databases/{client}/backup',
+    url: '/databases/{database}/backup',
 } satisfies RouteDefinition<["post"]>
 
 /**
-* @see \App\Http\Controllers\DatabaseController::backup
- * @see app/Http/Controllers/DatabaseController.php:29
- * @route '/databases/{client}/backup'
+* @see \App\Http\Controllers\ManagedDatabaseController::backup
+ * @see app/Http/Controllers/ManagedDatabaseController.php:54
+ * @route '/databases/{database}/backup'
  */
-backup.url = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+backup.url = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
-        args = { client: args }
+        args = { database: args }
     }
 
-            if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
-            args = { client: args.id }
+            if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+            args = { database: args.uuid }
         }
     
     if (Array.isArray(args)) {
         args = {
-                    client: args[0],
+                    database: args[0],
                 }
     }
 
     args = applyUrlDefaults(args)
 
     const parsedArgs = {
-                        client: typeof args.client === 'object'
-                ? args.client.id
-                : args.client,
+                        database: typeof args.database === 'object'
+                ? args.database.uuid
+                : args.database,
                 }
 
     return backup.definition.url
-            .replace('{client}', parsedArgs.client.toString())
+            .replace('{database}', parsedArgs.database.toString())
             .replace(/\/+$/, '') + queryParams(options)
 }
 
 /**
-* @see \App\Http\Controllers\DatabaseController::backup
- * @see app/Http/Controllers/DatabaseController.php:29
- * @route '/databases/{client}/backup'
+* @see \App\Http\Controllers\ManagedDatabaseController::backup
+ * @see app/Http/Controllers/ManagedDatabaseController.php:54
+ * @route '/databases/{database}/backup'
  */
-backup.post = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+backup.post = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: backup.url(args, options),
     method: 'post',
 })
 
     /**
-* @see \App\Http\Controllers\DatabaseController::backup
- * @see app/Http/Controllers/DatabaseController.php:29
- * @route '/databases/{client}/backup'
+* @see \App\Http\Controllers\ManagedDatabaseController::backup
+ * @see app/Http/Controllers/ManagedDatabaseController.php:54
+ * @route '/databases/{database}/backup'
  */
-    const backupForm = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const backupForm = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: backup.url(args, options),
         method: 'post',
     })
 
             /**
-* @see \App\Http\Controllers\DatabaseController::backup
- * @see app/Http/Controllers/DatabaseController.php:29
- * @route '/databases/{client}/backup'
+* @see \App\Http\Controllers\ManagedDatabaseController::backup
+ * @see app/Http/Controllers/ManagedDatabaseController.php:54
+ * @route '/databases/{database}/backup'
  */
-        backupForm.post = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        backupForm.post = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: backup.url(args, options),
             method: 'post',
         })
     
     backup.form = backupForm
 /**
-* @see \App\Http\Controllers\DatabaseController::resetPassword
- * @see app/Http/Controllers/DatabaseController.php:36
- * @route '/databases/{client}/reset-password'
+* @see \App\Http\Controllers\ManagedDatabaseController::resetPassword
+ * @see app/Http/Controllers/ManagedDatabaseController.php:63
+ * @route '/databases/{database}/reset-password'
  */
-export const resetPassword = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const resetPassword = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: resetPassword.url(args, options),
     method: 'post',
 })
 
 resetPassword.definition = {
     methods: ["post"],
-    url: '/databases/{client}/reset-password',
+    url: '/databases/{database}/reset-password',
 } satisfies RouteDefinition<["post"]>
 
 /**
-* @see \App\Http\Controllers\DatabaseController::resetPassword
- * @see app/Http/Controllers/DatabaseController.php:36
- * @route '/databases/{client}/reset-password'
+* @see \App\Http\Controllers\ManagedDatabaseController::resetPassword
+ * @see app/Http/Controllers/ManagedDatabaseController.php:63
+ * @route '/databases/{database}/reset-password'
  */
-resetPassword.url = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+resetPassword.url = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
-        args = { client: args }
+        args = { database: args }
     }
 
-            if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
-            args = { client: args.id }
+            if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+            args = { database: args.uuid }
         }
     
     if (Array.isArray(args)) {
         args = {
-                    client: args[0],
+                    database: args[0],
                 }
     }
 
     args = applyUrlDefaults(args)
 
     const parsedArgs = {
-                        client: typeof args.client === 'object'
-                ? args.client.id
-                : args.client,
+                        database: typeof args.database === 'object'
+                ? args.database.uuid
+                : args.database,
                 }
 
     return resetPassword.definition.url
-            .replace('{client}', parsedArgs.client.toString())
+            .replace('{database}', parsedArgs.database.toString())
             .replace(/\/+$/, '') + queryParams(options)
 }
 
 /**
-* @see \App\Http\Controllers\DatabaseController::resetPassword
- * @see app/Http/Controllers/DatabaseController.php:36
- * @route '/databases/{client}/reset-password'
+* @see \App\Http\Controllers\ManagedDatabaseController::resetPassword
+ * @see app/Http/Controllers/ManagedDatabaseController.php:63
+ * @route '/databases/{database}/reset-password'
  */
-resetPassword.post = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+resetPassword.post = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: resetPassword.url(args, options),
     method: 'post',
 })
 
     /**
-* @see \App\Http\Controllers\DatabaseController::resetPassword
- * @see app/Http/Controllers/DatabaseController.php:36
- * @route '/databases/{client}/reset-password'
+* @see \App\Http\Controllers\ManagedDatabaseController::resetPassword
+ * @see app/Http/Controllers/ManagedDatabaseController.php:63
+ * @route '/databases/{database}/reset-password'
  */
-    const resetPasswordForm = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const resetPasswordForm = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: resetPassword.url(args, options),
         method: 'post',
     })
 
             /**
-* @see \App\Http\Controllers\DatabaseController::resetPassword
- * @see app/Http/Controllers/DatabaseController.php:36
- * @route '/databases/{client}/reset-password'
+* @see \App\Http\Controllers\ManagedDatabaseController::resetPassword
+ * @see app/Http/Controllers/ManagedDatabaseController.php:63
+ * @route '/databases/{database}/reset-password'
  */
-        resetPasswordForm.post = (args: { client: number | { id: number } } | [client: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        resetPasswordForm.post = (args: { database: string | { uuid: string } } | [database: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: resetPassword.url(args, options),
             method: 'post',
         })
@@ -237,6 +428,8 @@ resetPassword.post = (args: { client: number | { id: number } } | [client: numbe
     resetPassword.form = resetPasswordForm
 const databases = {
     index: Object.assign(index, index),
+show: Object.assign(show, show),
+destroy: Object.assign(destroy, destroy),
 backup: Object.assign(backup, backup),
 resetPassword: Object.assign(resetPassword, resetPassword),
 }

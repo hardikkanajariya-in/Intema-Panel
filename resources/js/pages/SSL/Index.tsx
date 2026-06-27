@@ -1,67 +1,63 @@
-import { Head, router, useForm } from '@inertiajs/react';
-import { type FormEvent } from 'react';
+import { Head, router } from '@inertiajs/react';
 
+import { Shield } from '@/components/Icons';
+import { EmptyState } from '@/components/EmptyState';
 import { PageHeader } from '@/components/PageHeader';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import AppLayout from '@/layouts/AppLayout';
-
-interface Certificate {
-    domain: string;
-    expiry: string;
-}
+import type { SslCertificate } from '@/types/resource';
+import type { PaginatedData } from '@/types/pagination';
 
 interface SslIndexProps {
-    certificates: Certificate[];
-    defaultEmail: string;
+    certificates: PaginatedData<SslCertificate>;
+    systemCertificates: Array<{ domain: string; expiry: string }>;
 }
 
-export default function SslIndex({ certificates, defaultEmail }: SslIndexProps) {
-    const { data, setData, post, processing } = useForm({ domain: '', email: defaultEmail });
-
-    const submit = (event: FormEvent) => {
-        event.preventDefault();
-        post('/ssl');
-    };
-
+export default function SslIndex({ certificates, systemCertificates }: SslIndexProps) {
     return (
         <AppLayout>
-            <Head title="SSL" />
-            <PageHeader title="SSL Certificates" description="Let's Encrypt certificate management" breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }, { title: 'SSL' }]} actions={<Button variant="outline" onClick={() => router.post('/ssl/renew', {})}>Renew All</Button>} />
-
-            <Card className="mb-6">
-                <CardHeader><CardTitle>Obtain Certificate</CardTitle></CardHeader>
-                <CardContent>
-                    <form onSubmit={submit} className="grid gap-4 sm:grid-cols-3">
-                        <div><Label htmlFor="domain">Domain</Label><Input id="domain" value={data.domain} onChange={(e) => setData('domain', e.target.value)} /></div>
-                        <div><Label htmlFor="email">Email</Label><Input id="email" value={data.email} onChange={(e) => setData('email', e.target.value)} /></div>
-                        <div className="flex items-end"><Button type="submit" disabled={processing}>Generate</Button></div>
-                    </form>
-                </CardContent>
-            </Card>
-
-            <div className="rounded-xl border border-border bg-card shadow-sm">
-                <Table>
-                    <TableHeader><TableRow><TableHead>Domain</TableHead><TableHead>Expiry</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
-                    <TableBody>
-                        {certificates.map((cert) => (
-                            <TableRow key={cert.domain}>
-                                <TableCell>{cert.domain}</TableCell>
-                                <TableCell>{cert.expiry}</TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-1">
-                                        <Button size="sm" variant="outline" onClick={() => router.post('/ssl/renew', { domain: cert.domain })}>Renew</Button>
-                                        <Button size="sm" variant="outline" onClick={() => router.delete(`/ssl/${cert.domain}`)}>Delete</Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
+            <Head title="SSL Certificates" />
+            <PageHeader title="SSL Certificates" description="Independent SSL certificate resources" breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }, { title: 'SSL' }]} actions={<Button href="/resources/create">Create Resource</Button>} />
+            {certificates.data.length === 0 ? (
+                <EmptyState title="No certificates" description="Create an SSL certificate resource to get started." icon={<Shield size={40} />} action={<Button href="/resources/create">Create Resource</Button>} />
+            ) : (
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <Table>
+                        <TableHeader><TableRow><TableHead>Domain</TableHead><TableHead>Issuer</TableHead><TableHead>Expires</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                        <TableBody>
+                            {certificates.data.map((cert) => (
+                                <TableRow key={cert.uuid}>
+                                    <TableCell className="font-medium">{cert.domain_name}</TableCell>
+                                    <TableCell>{cert.issuer ?? '—'}</TableCell>
+                                    <TableCell>{cert.expires_at ? new Date(cert.expires_at).toLocaleDateString() : '—'}</TableCell>
+                                    <TableCell><Badge variant="success">{cert.status_label}</Badge></TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" href={`/ssl-certificates/${cert.uuid}`}>View</Button>
+                                        <Button size="sm" variant="outline" onClick={() => router.post(`/ssl-certificates/${cert.uuid}/renew`)}>Renew</Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            )}
+            {systemCertificates.length > 0 && (
+                <div className="mt-8">
+                    <h3 className="mb-4 text-lg font-semibold">System Certificates</h3>
+                    <div className="rounded-xl border border-border bg-card shadow-sm">
+                        <Table>
+                            <TableHeader><TableRow><TableHead>Domain</TableHead><TableHead>Expiry</TableHead></TableRow></TableHeader>
+                            <TableBody>
+                                {systemCertificates.map((cert) => (
+                                    <TableRow key={cert.domain}><TableCell>{cert.domain}</TableCell><TableCell>{cert.expiry}</TableCell></TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </div>
+            )}
         </AppLayout>
     );
 }

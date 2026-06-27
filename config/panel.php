@@ -10,7 +10,7 @@ return [
 
     'name' => env('PANEL_NAME', 'Intema Panel'),
 
-    'tagline' => env('PANEL_TAGLINE', 'Open Source Lightweight Hosting Control Panel'),
+    'tagline' => env('PANEL_TAGLINE', 'Infrastructure Resource Manager'),
 
     'company' => env('PANEL_COMPANY', 'Hardik Kanajariya'),
 
@@ -20,7 +20,7 @@ return [
 
     'support_email' => env('PANEL_SUPPORT_EMAIL', 'hello@hardikkanajariya.in'),
 
-    'version' => env('PANEL_VERSION', '1.0.0-rc1'),
+    'version' => env('PANEL_VERSION', '1.0.0'),
 
     'license' => 'MIT',
 
@@ -34,9 +34,9 @@ return [
 
     'theme' => env('PANEL_THEME', 'system'),
 
-    'default_database_prefix' => env('PANEL_DATABASE_PREFIX', 'client_'),
+    'default_database_prefix' => env('PANEL_DATABASE_PREFIX', 'res_'),
 
-    'default_client_status' => env('PANEL_DEFAULT_CLIENT_STATUS', 'active'),
+    'default_resource_status' => env('PANEL_DEFAULT_RESOURCE_STATUS', 'active'),
 
     /*
     |--------------------------------------------------------------------------

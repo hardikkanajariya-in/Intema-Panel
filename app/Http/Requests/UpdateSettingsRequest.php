@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\ClientStatus;
+use App\Enums\ResourceStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -28,7 +28,7 @@ class UpdateSettingsRequest extends FormRequest
             'theme' => ['required', Rule::in(['light', 'dark', 'system'])],
             'github_url' => ['required', 'url', 'max:255'],
             'default_database_prefix' => ['required', 'string', 'max:32', 'regex:/^[a-z][a-z0-9_]*$/'],
-            'default_client_status' => ['required', Rule::enum(ClientStatus::class)],
+            'default_resource_status' => ['required', Rule::enum(ResourceStatus::class)],
         ];
     }
 }

@@ -1,77 +1,48 @@
 import { Head, router } from '@inertiajs/react';
 
+import { Database, Eye } from '@/components/Icons';
+import { EmptyState } from '@/components/EmptyState';
 import { PageHeader } from '@/components/PageHeader';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import AppLayout from '@/layouts/AppLayout';
-
-interface DatabaseEntry {
-    id: number;
-    company_name: string;
-    domain: string;
-    database_name: string;
-    database_user: string;
-    exists: boolean;
-    connection_string: string;
-}
+import type { ManagedDatabase } from '@/types/resource';
+import type { PaginatedData } from '@/types/pagination';
 
 interface DatabasesIndexProps {
-    databases: DatabaseEntry[];
-    adminerUrl: string;
-    postgresqlStatus: string;
+    databases: PaginatedData<ManagedDatabase>;
 }
 
-export default function DatabasesIndex({ databases, adminerUrl, postgresqlStatus }: DatabasesIndexProps) {
+export default function DatabasesIndex({ databases }: DatabasesIndexProps) {
     return (
         <AppLayout>
             <Head title="Databases" />
-
-            <PageHeader
-                title="PostgreSQL Databases"
-                description="Manage client databases provisioned by the panel"
-                breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }, { title: 'Databases' }]}
-                actions={<Button href={adminerUrl} variant="outline">Open Adminer</Button>}
-            />
-
-            <Card className="mb-6">
-                <CardHeader><CardTitle>PostgreSQL Status</CardTitle></CardHeader>
-                <CardContent><Badge variant={postgresqlStatus === 'Running' ? 'success' : 'destructive'}>{postgresqlStatus}</Badge></CardContent>
-            </Card>
-
-            <div className="rounded-xl border border-border bg-card shadow-sm">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Client</TableHead>
-                            <TableHead>Database</TableHead>
-                            <TableHead>User</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {databases.map((db) => (
-                            <TableRow key={db.id}>
-                                <TableCell>
-                                    <div className="font-medium">{db.company_name}</div>
-                                    <div className="text-xs text-muted-foreground">{db.domain}</div>
-                                </TableCell>
-                                <TableCell className="font-mono text-xs">{db.database_name}</TableCell>
-                                <TableCell className="font-mono text-xs">{db.database_user}</TableCell>
-                                <TableCell><Badge variant={db.exists ? 'success' : 'destructive'}>{db.exists ? 'Exists' : 'Missing'}</Badge></TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-1">
-                                        <Button size="sm" variant="outline" onClick={() => router.post(`/databases/${db.id}/backup`)}>Backup</Button>
-                                        <Button size="sm" variant="outline" onClick={() => router.post(`/databases/${db.id}/reset-password`)}>Reset Password</Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
+            <PageHeader title="PostgreSQL Databases" description="Independent database resources" breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }, { title: 'Databases' }]} actions={<Button href="/resources/create">Create Resource</Button>} />
+            {databases.data.length === 0 ? (
+                <EmptyState title="No databases" description="Create a database resource to get started." icon={<Database size={40} />} action={<Button href="/resources/create">Create Resource</Button>} />
+            ) : (
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <Table>
+                        <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Database</TableHead><TableHead>User</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                        <TableBody>
+                            {databases.data.map((db) => (
+                                <TableRow key={db.uuid}>
+                                    <TableCell className="font-medium">{db.name}</TableCell>
+                                    <TableCell className="font-mono text-xs">{db.database_name}</TableCell>
+                                    <TableCell className="font-mono text-xs">{db.database_user}</TableCell>
+                                    <TableCell><Badge variant={db.status === 'active' ? 'success' : 'secondary'}>{db.status_label}</Badge></TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon" href={`/databases/${db.uuid}`}><Eye size={16} /></Button>
+                                        <Button size="sm" variant="outline" onClick={() => router.post(`/databases/${db.uuid}/backup`)}>Backup</Button>
+                                        <Button size="sm" variant="outline" onClick={() => router.post(`/databases/${db.uuid}/reset-password`)}>Reset Password</Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            )}
         </AppLayout>
     );
 }

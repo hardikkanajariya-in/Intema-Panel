@@ -1,13 +1,14 @@
 import {
-    Cloud,
+    AppWindow,
     Database,
     Folder,
+    FolderKanban,
     LayoutDashboard,
     Monitor,
+    Plus,
     Server,
     Settings,
     Shield,
-    Users,
 } from '@/components/Icons';
 import type { NavItem } from '@/types/navigation';
 
@@ -19,10 +20,16 @@ export const mainNavigation: NavItem[] = [
         routeName: 'dashboard',
     },
     {
-        title: 'Clients',
-        href: '/clients',
-        icon: Users,
-        routeName: 'clients.index',
+        title: 'Projects',
+        href: '/projects',
+        icon: FolderKanban,
+        routeName: 'projects.index',
+    },
+    {
+        title: 'Applications',
+        href: '/applications',
+        icon: AppWindow,
+        routeName: 'applications.index',
     },
     {
         title: 'Databases',
@@ -31,26 +38,32 @@ export const mainNavigation: NavItem[] = [
         routeName: 'databases.index',
     },
     {
+        title: 'Domains',
+        href: '/domains',
+        icon: Server,
+        routeName: 'domains.index',
+    },
+    {
+        title: 'SSL',
+        href: '/ssl-certificates',
+        icon: Shield,
+        routeName: 'ssl-certificates.index',
+    },
+];
+
+export const secondaryNavigation: NavItem[] = [
+    {
+        title: 'Create Resource',
+        href: '/resources/create',
+        icon: Plus,
+        routeName: 'resources.create',
+    },
+    {
         title: 'Nginx',
         href: '/nginx',
         icon: Server,
         routeName: 'nginx.index',
     },
-    {
-        title: 'SSL',
-        href: '/ssl',
-        icon: Shield,
-        routeName: 'ssl.index',
-    },
-    {
-        title: 'Cloudflare',
-        href: '/cloudflare',
-        icon: Cloud,
-        routeName: 'cloudflare.index',
-    },
-];
-
-export const secondaryNavigation: NavItem[] = [
     {
         title: 'System',
         href: '/system',

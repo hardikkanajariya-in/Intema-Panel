@@ -11,13 +11,13 @@ case "${1:-}" in
         exec bash "${ROOT_DIR}/bootstrap/update.sh" "${@:2}"
         ;;
     doctor)
-        exec bash "${ROOT_DIR}/doctor.sh" "${@:2}"
+        exec bash "${ROOT_DIR}/bootstrap/doctor.sh" "${@:2}"
         ;;
     repair)
         exec bash "${ROOT_DIR}/bootstrap/repair.sh" "${@:2}"
         ;;
     uninstall)
-        exec bash "${ROOT_DIR}/uninstall.sh" "${@:2}"
+        exec bash "${ROOT_DIR}/bootstrap/uninstall.sh" "${@:2}"
         ;;
     verify)
         exec bash "${ROOT_DIR}/bootstrap/verify.sh" "${@:2}"

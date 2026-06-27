@@ -218,3 +218,21 @@ export const Globe = createIcon(
 export const Activity = createIcon(<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />);
 
 export const Folder = createIcon(<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />);
+
+export const FolderKanban = createIcon(
+    <>
+        <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+        <path d="M8 10v4" />
+        <path d="M12 10v2" />
+        <path d="M16 10v6" />
+    </>,
+);
+
+export const AppWindow = createIcon(
+    <>
+        <rect x="2" y="4" width="20" height="16" rx="2" />
+        <path d="M10 4v4" />
+        <path d="M2 8h20" />
+        <path d="M6 4v4" />
+    </>,
+);

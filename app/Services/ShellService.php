@@ -77,6 +77,55 @@ class ShellService
     }
 
     /**
+     * @param  list<string>  $arguments
+     */
+    public function runSystem(
+        string $command,
+        array $arguments = [],
+        ?string $cwd = null,
+        bool $optional = false,
+    ): ShellResult {
+        if (! config('panel.shell.enabled')) {
+            throw new ShellExecutionException('Shell execution is disabled.');
+        }
+
+        if (! preg_match('/^[a-zA-Z0-9._-]+$/', $command)) {
+            throw new InvalidArgumentException('Invalid system command.');
+        }
+
+        foreach ($arguments as $argument) {
+            if (! is_string($argument) || str_contains($argument, "\0")) {
+                throw new InvalidArgumentException('Invalid command argument.');
+            }
+        }
+
+        $process = new Process(
+            array_merge([$command, ...$arguments]),
+            $cwd,
+            $this->postgresEnvironment(),
+            null,
+            (int) config('panel.shell.timeout'),
+        );
+
+        $process->run();
+
+        $result = new ShellResult(
+            exitCode: (int) $process->getExitCode(),
+            output: trim($process->getOutput()),
+            errorOutput: trim($process->getErrorOutput()),
+        );
+
+        if (! $result->successful() && ! $optional) {
+            throw new ShellExecutionException(
+                $result->message() ?: "Command {$command} failed.",
+                $result->exitCode,
+            );
+        }
+
+        return $result;
+    }
+
+    /**
      * @return array<string, string>
      */
     private function postgresEnvironment(): array

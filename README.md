@@ -1,20 +1,22 @@
 # Intema Panel
 
-**Open Source Lightweight Hosting Control Panel**
+**Infrastructure Resource Manager**
 
-Intema Panel is a self-hosted infrastructure management tool for single-server VPS environments. Manage clients, PostgreSQL databases, Nginx, SSL, and Cloudflare from a clean modern web interface.
+Intema Panel is an open-source, self-hosted infrastructure management system for single-server VPS environments. Organize independent resources — applications, databases, domains, and SSL certificates — under optional projects, with a provision engine that executes reusable native Linux tasks.
 
 Created by [Hardik Kanajariya](https://hardikkanajariya.in).
 
 ## Features
 
-- Client management with automatic PostgreSQL provisioning
-- Encrypted credential storage (SQLite metadata)
-- Activity logging and audit trail
-- Real-time system metrics dashboard
-- Light / dark mode
-- Single administrator authentication
-- Modular shell script layer for database operations
+- **Project-based organization** — group resources optionally; nothing is auto-coupled
+- **Independent resources** — applications, PostgreSQL databases, domains, SSL certificates
+- **Provision Engine** — composable tasks (folder, user, clone, composer, nginx, SSL, etc.)
+- **Application provisioners** — Laravel, PHP, Static, Next.js (Vercel metadata), NestJS (metadata), API, Custom
+- **Encrypted credential storage** (SQLite metadata)
+- **Activity logging** with audit trail
+- **Dashboard** — projects, resources, server health, expiring certificates, deployments
+- **Server management** — PHP, Composer, Node, PostgreSQL, Nginx, Certbot, Git, Supervisor, Fail2Ban, UFW
+- **Light / dark mode** and single administrator authentication
 
 ## Requirements
 
@@ -46,7 +48,7 @@ Open `http://SERVER-IP` and complete the **Setup Wizard**.
 
 ```bash
 sudo ln -sf /var/www/intema-panel/bin/intema /usr/local/bin/intema
-intema install    # Full server bootstrap
+intema install    # Full server bootstrap (idempotent)
 intema update     # Update panel
 intema doctor     # Health checks
 intema repair     # Fix permissions and rebuild
@@ -59,8 +61,8 @@ intema uninstall  # Remove build artifacts
 Copy `.env.example` to `.env` and configure:
 
 - `PANEL_PG_*` — PostgreSQL admin credentials
+- `PANEL_NAME`, `PANEL_TAGLINE`, `PANEL_COMPANY`, `PANEL_WEBSITE` — branding (defaults in `config/panel.php`)
 - `ADMIN_EMAIL` / `ADMIN_PASSWORD` — administrator account
-- `PANEL_*` — branding and defaults
 
 ## Development
 
@@ -69,24 +71,33 @@ composer install
 npm install
 cp .env.example .env
 php artisan key:generate
-php artisan migrate --seed
+touch database/database.sqlite
+php artisan migrate
 composer run dev
 ```
 
 ## Architecture
 
-- **Laravel** — backend API, authentication, business logic
-- **React + Inertia** — SPA frontend with TypeScript
-- **SQLite** — panel metadata storage
-- **PostgreSQL** — managed client databases
-- **Shell scripts** — idempotent database operations invoked via Symfony Process
+```
+Project (organizational)
+  └── Resources (independent)
+        ├── Applications  → Provisioners → Tasks → Shell
+        ├── Databases     → PostgreSQL scripts
+        ├── Domains       → Nginx (optional)
+        └── SSL           → Certbot (optional)
+```
+
+- **Laravel 13** — backend, authentication, policies, validation
+- **React + Inertia v3** — SPA frontend with TypeScript
+- **SQLite** — panel metadata (`projects`, `applications`, `databases`, `domains`, `ssl_certificates`, `deployments`)
+- **Shell scripts** — native Linux provisioning (no Docker)
+
+See [docs/architecture.md](docs/architecture.md) for details.
 
 ## License
 
-MIT License — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
 
-## Links
+## Contributing
 
-- Website: https://hardikkanajariya.in
-- GitHub: https://github.com/hardikkanajariya/intema-panel
-- Issues: https://github.com/hardikkanajariya/intema-panel/issues
+See [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: see [SECURITY.md](SECURITY.md).

@@ -18,15 +18,5 @@ export interface PanelSettings {
     theme: string;
     github_url: string;
     default_database_prefix: string;
-    default_client_status: string;
-}
-
-export interface ActivityLogEntry {
-    id: number;
-    action: string;
-    status: string;
-    description: string;
-    actor: string | null;
-    properties: Record<string, unknown> | null;
-    created_at: string | null;
+    default_resource_status: string;
 }

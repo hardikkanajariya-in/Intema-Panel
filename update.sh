@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 exec bash "${ROOT_DIR}/bootstrap/update.sh" "$@"

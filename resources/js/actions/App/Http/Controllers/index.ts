@@ -2,11 +2,13 @@ import SetupController from './SetupController'
 import Auth from './Auth'
 import AppearanceController from './AppearanceController'
 import DashboardController from './DashboardController'
-import ClientController from './ClientController'
-import DatabaseController from './DatabaseController'
+import ProjectController from './ProjectController'
+import ResourceWizardController from './ResourceWizardController'
+import ApplicationController from './ApplicationController'
+import ManagedDatabaseController from './ManagedDatabaseController'
+import DomainController from './DomainController'
+import SslCertificateController from './SslCertificateController'
 import NginxController from './NginxController'
-import SslController from './SslController'
-import CloudflareController from './CloudflareController'
 import SystemController from './SystemController'
 import FileManagerController from './FileManagerController'
 import ActivityLogController from './ActivityLogController'
@@ -16,11 +18,13 @@ const Controllers = {
 Auth: Object.assign(Auth, Auth),
 AppearanceController: Object.assign(AppearanceController, AppearanceController),
 DashboardController: Object.assign(DashboardController, DashboardController),
-ClientController: Object.assign(ClientController, ClientController),
-DatabaseController: Object.assign(DatabaseController, DatabaseController),
+ProjectController: Object.assign(ProjectController, ProjectController),
+ResourceWizardController: Object.assign(ResourceWizardController, ResourceWizardController),
+ApplicationController: Object.assign(ApplicationController, ApplicationController),
+ManagedDatabaseController: Object.assign(ManagedDatabaseController, ManagedDatabaseController),
+DomainController: Object.assign(DomainController, DomainController),
+SslCertificateController: Object.assign(SslCertificateController, SslCertificateController),
 NginxController: Object.assign(NginxController, NginxController),
-SslController: Object.assign(SslController, SslController),
-CloudflareController: Object.assign(CloudflareController, CloudflareController),
 SystemController: Object.assign(SystemController, SystemController),
 FileManagerController: Object.assign(FileManagerController, FileManagerController),
 ActivityLogController: Object.assign(ActivityLogController, ActivityLogController),

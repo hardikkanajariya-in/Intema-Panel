@@ -2,13 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\Client;
+use App\Models\ManagedDatabase;
 use Illuminate\Support\Collection;
 
 class DatabaseManagerService
 {
     public function __construct(
         private readonly PostgresService $postgresService,
+        private readonly ShellService $shellService,
     ) {}
 
     /**
@@ -16,42 +17,35 @@ class DatabaseManagerService
      */
     public function list(): Collection
     {
-        return Client::query()
-            ->whereNotNull('database_name')
-            ->orderBy('company_name')
+        return ManagedDatabase::query()
+            ->with(['project', 'application'])
+            ->orderBy('name')
             ->get()
-            ->map(fn (Client $client): array => [
-                'id' => $client->id,
-                'company_name' => $client->company_name,
-                'domain' => $client->domain,
-                'database_name' => $client->database_name,
-                'database_user' => $client->database_user,
-                'exists' => $client->database_name
-                    ? $this->postgresService->databaseExists($client->database_name)
-                    : false,
-                'connection_string' => $this->connectionString($client),
+            ->map(fn (ManagedDatabase $database): array => [
+                'uuid' => $database->uuid,
+                'name' => $database->name,
+                'database_name' => $database->database_name,
+                'database_user' => $database->database_user,
+                'exists' => $this->postgresService->databaseExists($database->database_name),
+                'connection_string' => $this->connectionString($database),
             ]);
     }
 
-    public function backup(Client $client): string
+    public function backup(ManagedDatabase $database): string
     {
-        if (! $client->database_name) {
-            throw new \InvalidArgumentException('Client has no database.');
-        }
-
-        $result = app(ShellService::class)->run('postgres_backup.sh', [$client->database_name]);
+        $result = $this->shellService->run('postgres_backup.sh', [$database->database_name]);
 
         return $result->output;
     }
 
-    public function connectionString(Client $client): string
+    public function connectionString(ManagedDatabase $database): string
     {
         return sprintf(
-            'postgresql://%s:***@%s:%s/%s',
-            $client->database_user ?? 'user',
-            config('panel.postgres.host'),
-            config('panel.postgres.port'),
-            $client->database_name ?? 'database',
+            'postgresql://%s:***@%s:%d/%s',
+            $database->database_user,
+            $database->host,
+            $database->port,
+            $database->database_name,
         );
     }
 }

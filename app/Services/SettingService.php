@@ -21,7 +21,7 @@ class SettingService
         'theme' => 'panel.theme',
         'github_url' => 'panel.github',
         'default_database_prefix' => 'panel.default_database_prefix',
-        'default_client_status' => 'panel.default_client_status',
+        'default_resource_status' => 'panel.default_resource_status',
     ];
 
     public function get(string $key, mixed $default = null): mixed

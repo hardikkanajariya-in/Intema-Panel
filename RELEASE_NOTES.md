@@ -1,26 +1,43 @@
-# Release Candidate 1 (RC1)
+# Release Notes — v1.0.0
 
-**Release Date:** 2026-06-27  
-**Version:** 1.0.0-rc1
+## Intema Panel v1.0.0
 
-## Highlights
+**Infrastructure Resource Manager**
 
-- Fresh Ubuntu 24.04 bootstrap installer with modular scripts
-- Browser-based first-boot setup wizard
-- Production-ready client management with PostgreSQL auto-provisioning
-- System Manager with native Linux service detection and control
-- PostgreSQL, Nginx, and SSL management modules
-- Lightweight file manager for logs and `.env` editing
-- Real-time system monitoring dashboard
-- `intema` CLI launcher (`install`, `update`, `doctor`, `repair`, `uninstall`, `verify`)
+### Highlights
 
-## Upgrade Notes
+- Complete architectural refactor from client-centric to **resource-based infrastructure management**
+- **Projects** as organizational containers; all resources are independent
+- **Provision Engine** with reusable tasks and framework-specific application provisioners
+- **Resource Wizard** — create applications, databases, domains, or SSL in guided steps
+- **Dashboard** — projects, applications, databases, domains, SSL, server health, activity, deployments
+- Policies, rate limiting, encrypted secrets, and escaped shell arguments throughout
+- Idempotent installer with `install`, `update`, `doctor`, `repair`, `verify`, `uninstall` CLI commands
 
-- Run `./bootstrap/update.sh` or `intema update` to upgrade from v1.0.0
-- Complete the setup wizard on first boot if `setup_completed` is not set
+### Application Types
 
-## Known Limitations (RC1)
+| Type | Provisioning |
+|------|-------------|
+| Static Website | Full native provisioning |
+| Laravel | Full native provisioning |
+| Standard PHP | Full native provisioning |
+| API Only | Full native provisioning |
+| Custom | Configurable task pipeline |
+| Next.js | Vercel deployment metadata only |
+| NestJS | Metadata only (future ready) |
 
-- Cloudflare module remains a placeholder (planned v1.1)
+### Breaking Changes from RC1
+
+- `clients` table removed — use `projects` + independent resources
+- Routes changed: `/clients` → `/projects`, `/ssl` → `/ssl-certificates`
+- Cloudflare placeholder removed (planned for future release)
+
+### Known Limitations
+
+- Next.js and NestJS are metadata-only in v1.0
 - File manager is read-only except `.env`
-- System package installation buttons require server-side bootstrap (not triggered from panel UI yet)
+- Package installation is via bootstrap CLI, not panel UI
+
+---
+
+Created by [Hardik Kanajariya](https://hardikkanajariya.in)
