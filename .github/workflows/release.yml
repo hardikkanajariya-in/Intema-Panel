@@ -19,7 +19,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, intl, gd
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -32,24 +32,48 @@ jobs:
           node-version: "20"
           cache: pnpm
 
-      - name: Build release
+      - name: Install PHP dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Build frontend
         run: |
-          composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
           pnpm install --frozen-lockfile
           pnpm run build
 
+      - name: Optimize Laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          rm -f .env
+
       - name: Create release archive
         run: |
-          ARCHIVE="/tmp/intema-panel-${GITHUB_REF_NAME}.tar.gz"
-          tar -czf "$ARCHIVE" \
+          tar -czf intema-panel.tar.gz \
             --exclude=node_modules \
             --exclude=.git \
+            --exclude=tests \
+            --exclude=.editorconfig \
+            --exclude=.github \
+            --exclude=.vscode \
             --exclude=storage/logs \
+            --exclude=.env \
+            --exclude='storage/framework/cache/data/*' \
+            --exclude='storage/framework/sessions/*' \
+            --exclude='storage/framework/views/*' \
             .
-          mv "$ARCHIVE" .
+
+      - name: Generate SHA256 checksum
+        run: |
+          sha256sum intema-panel.tar.gz > intema-panel.tar.gz.sha256
+          cat intema-panel.tar.gz.sha256
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
-          files: intema-panel-*.tar.gz
+          files: |
+            intema-panel.tar.gz
+            intema-panel.tar.gz.sha256
           generate_release_notes: true

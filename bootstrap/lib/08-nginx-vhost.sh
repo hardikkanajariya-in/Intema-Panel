@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly APP_DIR="${PANEL_INSTALL_PATH:-/var/www/intema-panel}"
+readonly APP_DIR="${PANEL_INSTALL_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 readonly SERVER_NAME="${PANEL_SERVER_NAME:-_}"
 
 cat > /etc/nginx/sites-available/intema-panel <<EOF

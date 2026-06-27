@@ -14,7 +14,16 @@ php artisan migrate --force
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
-npm run build || pnpm run build
+if [[ -f package.json ]] && { [[ -d node_modules ]] || command -v pnpm >/dev/null 2>&1 || command -v npm >/dev/null 2>&1; }; then
+    if command -v pnpm >/dev/null 2>&1; then
+        pnpm run build 2>/dev/null || true
+    else
+        npm run build 2>/dev/null || true
+    fi
+fi
+php artisan config:cache 2>/dev/null || true
+php artisan route:cache 2>/dev/null || true
+php artisan view:cache 2>/dev/null || true
 systemctl restart php8.3-fpm 2>/dev/null || true
 systemctl restart nginx 2>/dev/null || true
 
