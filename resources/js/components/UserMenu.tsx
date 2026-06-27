@@ -25,7 +25,9 @@ export function UserMenu({ userName, userEmail }: UserMenuProps) {
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <User size={16} />
                 </div>
-                <span className="hidden text-sm font-medium sm:inline">{userName}</span>
+                <span className="hidden text-sm font-medium sm:inline">
+                    {userName}
+                </span>
             </Button>
 
             {open ? (
@@ -44,8 +46,12 @@ export function UserMenu({ userName, userEmail }: UserMenuProps) {
                         )}
                     >
                         <div className="border-b border-border px-3 py-2">
-                            <p className="text-sm font-medium text-foreground">{userName}</p>
-                            <p className="text-xs text-muted-foreground">{userEmail}</p>
+                            <p className="text-sm font-medium text-foreground">
+                                {userName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {userEmail}
+                            </p>
                         </div>
                         <button
                             type="button"

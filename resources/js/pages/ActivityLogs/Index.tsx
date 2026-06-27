@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 
-import { Activity } from '@/components/Icons';
 import { EmptyState } from '@/components/EmptyState';
+import { Activity } from '@/components/Icons';
 import { PageHeader } from '@/components/PageHeader';
 import { Badge } from '@/components/ui/Badge';
 import {
@@ -20,8 +20,14 @@ interface ActivityLogsIndexProps {
     logs: PaginatedData<ActivityLogEntry>;
 }
 
-function statusVariant(status: string): 'success' | 'destructive' | 'secondary' {
-    return status === 'success' ? 'success' : status === 'failed' ? 'destructive' : 'secondary';
+function statusVariant(
+    status: string,
+): 'success' | 'destructive' | 'secondary' {
+    return status === 'success'
+        ? 'success'
+        : status === 'failed'
+          ? 'destructive'
+          : 'secondary';
 }
 
 export default function ActivityLogsIndex({ logs }: ActivityLogsIndexProps) {
@@ -59,17 +65,25 @@ export default function ActivityLogsIndex({ logs }: ActivityLogsIndexProps) {
                         <TableBody>
                             {logs.data.map((log) => (
                                 <TableRow key={log.id}>
-                                    <TableCell className="font-mono text-xs">{log.action}</TableCell>
+                                    <TableCell className="font-mono text-xs">
+                                        {log.action}
+                                    </TableCell>
                                     <TableCell>{log.description}</TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {log.actor ?? 'System'}
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={statusVariant(log.status)}>{log.status}</Badge>
+                                        <Badge
+                                            variant={statusVariant(log.status)}
+                                        >
+                                            {log.status}
+                                        </Badge>
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {log.created_at
-                                            ? new Date(log.created_at).toLocaleString()
+                                            ? new Date(
+                                                  log.created_at,
+                                              ).toLocaleString()
                                             : '—'}
                                     </TableCell>
                                 </TableRow>

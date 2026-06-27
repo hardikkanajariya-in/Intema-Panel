@@ -3,8 +3,21 @@ import { Head, router } from '@inertiajs/react';
 import { PageHeader } from '@/components/PageHeader';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle, StatCard } from '@/components/ui/Card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    StatCard,
+} from '@/components/ui/Card';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/Table';
 import AppLayout from '@/layouts/AppLayout';
 
 interface ComponentStatus {
@@ -34,7 +47,10 @@ interface SystemIndexProps {
     components: ComponentStatus[];
 }
 
-export default function SystemIndex({ monitoring, components }: SystemIndexProps) {
+export default function SystemIndex({
+    monitoring,
+    components,
+}: SystemIndexProps) {
     const runAction = (component: string, action: string) => {
         router.post('/system/action', { component, action });
     };
@@ -42,51 +58,175 @@ export default function SystemIndex({ monitoring, components }: SystemIndexProps
     return (
         <AppLayout>
             <Head title="System" />
-            <PageHeader title="System" description="Monitoring and service management" breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }, { title: 'System' }]} />
+            <PageHeader
+                title="System"
+                description="Monitoring and service management"
+                breadcrumbs={[
+                    { title: 'Dashboard', href: '/dashboard' },
+                    { title: 'System' },
+                ]}
+            />
             <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard title="CPU" value={monitoring.cpu} icon={<span>CPU</span>} />
-                <StatCard title="RAM" value={monitoring.ram} icon={<span>RAM</span>} />
-                <StatCard title="Disk" value={monitoring.disk} icon={<span>Disk</span>} />
-                <StatCard title="Uptime" value={monitoring.uptime} icon={<span>Up</span>} />
+                <StatCard
+                    title="CPU"
+                    value={monitoring.cpu}
+                    icon={<span>CPU</span>}
+                />
+                <StatCard
+                    title="RAM"
+                    value={monitoring.ram}
+                    icon={<span>RAM</span>}
+                />
+                <StatCard
+                    title="Disk"
+                    value={monitoring.disk}
+                    icon={<span>Disk</span>}
+                />
+                <StatCard
+                    title="Uptime"
+                    value={monitoring.uptime}
+                    icon={<span>Up</span>}
+                />
             </div>
             <div className="grid gap-6 lg:grid-cols-2">
                 <Card>
-                    <CardHeader><CardTitle>Runtime</CardTitle></CardHeader>
+                    <CardHeader>
+                        <CardTitle>Runtime</CardTitle>
+                    </CardHeader>
                     <CardContent className="space-y-2 text-sm">
-                        <Row label="Load Average" value={monitoring.loadAverage} />
-                        <Row label="Processes" value={String(monitoring.processes)} />
-                        <Row label="PHP" value={`${monitoring.php.version} (${monitoring.php.status})`} />
-                        <Row label="Nginx" value={`${monitoring.nginx.version} (${monitoring.nginx.status})`} />
-                        <Row label="PostgreSQL" value={`${monitoring.postgresql.version} (${monitoring.postgresql.status})`} />
+                        <Row
+                            label="Load Average"
+                            value={monitoring.loadAverage}
+                        />
+                        <Row
+                            label="Processes"
+                            value={String(monitoring.processes)}
+                        />
+                        <Row
+                            label="PHP"
+                            value={`${monitoring.php.version} (${monitoring.php.status})`}
+                        />
+                        <Row
+                            label="Nginx"
+                            value={`${monitoring.nginx.version} (${monitoring.nginx.status})`}
+                        />
+                        <Row
+                            label="PostgreSQL"
+                            value={`${monitoring.postgresql.version} (${monitoring.postgresql.status})`}
+                        />
                         <Row label="Laravel" value={monitoring.laravel} />
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardHeader><CardTitle>System Components</CardTitle></CardHeader>
+                    <CardHeader>
+                        <CardTitle>System Components</CardTitle>
+                    </CardHeader>
                     <CardContent className="p-0">
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Component</TableHead>
                                     <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead className="text-right">
+                                        Actions
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {components.map((component) => (
                                     <TableRow key={component.name}>
                                         <TableCell>
-                                            <div className="font-medium">{component.label}</div>
-                                            <div className="text-xs text-muted-foreground">{component.version ?? 'Not installed'}</div>
+                                            <div className="font-medium">
+                                                {component.label}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {component.version ??
+                                                    'Not installed'}
+                                            </div>
                                         </TableCell>
-                                        <TableCell><Badge variant={component.installed ? 'success' : 'secondary'}>{component.status}</Badge></TableCell>
+                                        <TableCell>
+                                            <Badge
+                                                variant={
+                                                    component.installed
+                                                        ? 'success'
+                                                        : 'secondary'
+                                                }
+                                            >
+                                                {component.status}
+                                            </Badge>
+                                        </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex flex-wrap justify-end gap-1">
-                                                {!component.installed && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'install')}>Install</Button>}
-                                                {component.installed && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'update')}>Update</Button>}
-                                                {component.installed && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'validate')}>Validate</Button>}
-                                                {component.installed && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'repair')}>Repair</Button>}
-                                                {component.service && <Button size="sm" variant="outline" onClick={() => runAction(component.name, 'restart')}>Restart</Button>}
+                                                {!component.installed && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            runAction(
+                                                                component.name,
+                                                                'install',
+                                                            )
+                                                        }
+                                                    >
+                                                        Install
+                                                    </Button>
+                                                )}
+                                                {component.installed && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            runAction(
+                                                                component.name,
+                                                                'update',
+                                                            )
+                                                        }
+                                                    >
+                                                        Update
+                                                    </Button>
+                                                )}
+                                                {component.installed && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            runAction(
+                                                                component.name,
+                                                                'validate',
+                                                            )
+                                                        }
+                                                    >
+                                                        Validate
+                                                    </Button>
+                                                )}
+                                                {component.installed && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            runAction(
+                                                                component.name,
+                                                                'repair',
+                                                            )
+                                                        }
+                                                    >
+                                                        Repair
+                                                    </Button>
+                                                )}
+                                                {component.service && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            runAction(
+                                                                component.name,
+                                                                'restart',
+                                                            )
+                                                        }
+                                                    >
+                                                        Restart
+                                                    </Button>
+                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>

@@ -1,9 +1,15 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { type FormEvent } from 'react';
+import type {FormEvent} from 'react';
 
 import { PanelFooter } from '@/components/PanelFooter';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import type { PanelConfig } from '@/types/panel';
@@ -52,7 +58,10 @@ export default function Login() {
                                         autoComplete="email"
                                         value={data.email}
                                         onChange={(event) => {
-                                            setData('email', event.target.value);
+                                            setData(
+                                                'email',
+                                                event.target.value,
+                                            );
                                         }}
                                         error={errors.email}
                                     />
@@ -67,7 +76,10 @@ export default function Login() {
                                         autoComplete="current-password"
                                         value={data.password}
                                         onChange={(event) => {
-                                            setData('password', event.target.value);
+                                            setData(
+                                                'password',
+                                                event.target.value,
+                                            );
                                         }}
                                         error={errors.password}
                                     />
@@ -77,13 +89,20 @@ export default function Login() {
                                         type="checkbox"
                                         checked={data.remember}
                                         onChange={(event) => {
-                                            setData('remember', event.target.checked);
+                                            setData(
+                                                'remember',
+                                                event.target.checked,
+                                            );
                                         }}
                                         className="rounded border-border"
                                     />
                                     Remember me
                                 </label>
-                                <Button type="submit" className="w-full" disabled={processing}>
+                                <Button
+                                    type="submit"
+                                    className="w-full"
+                                    disabled={processing}
+                                >
                                     Sign in
                                 </Button>
                             </form>

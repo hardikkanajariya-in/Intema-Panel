@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ManagedDatabase;
+use App\Services\ActivityLogService;
 use App\Services\DatabaseManagerService;
 use App\Services\PostgresService;
 use App\Support\ManagedDatabaseResource;
@@ -77,7 +78,7 @@ class ManagedDatabaseController extends Controller
         $this->postgresService->deprovision($database->database_name, $database->database_user);
         $database->delete();
 
-        app(\App\Services\ActivityLogService::class)->log(
+        app(ActivityLogService::class)->log(
             action: 'database.deleted',
             description: "Database \"{$database->name}\" was deleted.",
             subject: $database,

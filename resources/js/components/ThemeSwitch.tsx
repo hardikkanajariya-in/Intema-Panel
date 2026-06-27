@@ -3,8 +3,8 @@ import { router, usePage } from '@inertiajs/react';
 import { Laptop, Moon, Sun } from '@/components/Icons';
 import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/Hooks/useTheme';
-import type { Appearance } from '@/types/navigation';
 import { cn } from '@/lib/utils';
+import type { Appearance } from '@/types/navigation';
 
 const options: { value: Appearance; label: string; icon: typeof Sun }[] = [
     { value: 'light', label: 'Light', icon: Sun },

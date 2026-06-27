@@ -1,7 +1,11 @@
 import { Link, usePage } from '@inertiajs/react';
 
 import { Activity, X } from '@/components/Icons';
-import { isNavItemActive, mainNavigation, secondaryNavigation } from '@/components/navigation';
+import {
+    isNavItemActive,
+    mainNavigation,
+    secondaryNavigation,
+} from '@/components/navigation';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
@@ -65,23 +69,40 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 )}
             >
                 <div className="flex h-16 items-center justify-between border-b border-border px-6">
-                    <Link href="/dashboard" className="flex items-center gap-2" onClick={onClose}>
+                    <Link
+                        href="/dashboard"
+                        className="flex items-center gap-2"
+                        onClick={onClose}
+                    >
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                             <span className="text-sm font-bold">IP</span>
                         </div>
                         <div>
-                            <p className="text-sm font-bold text-foreground">{panel.name}</p>
-                            <p className="text-xs text-muted-foreground">{panel.tagline}</p>
+                            <p className="text-sm font-bold text-foreground">
+                                {panel.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {panel.tagline}
+                            </p>
                         </div>
                     </Link>
-                    <Button variant="ghost" size="icon" className="lg:hidden" onClick={onClose}>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="lg:hidden"
+                        onClick={onClose}
+                    >
                         <X size={18} />
                     </Button>
                 </div>
 
                 <nav className="flex flex-1 flex-col gap-6 overflow-y-auto p-4">
-                    <div className="space-y-1">{renderNavItems(mainNavigation)}</div>
-                    <div className="space-y-1">{renderNavItems(bottomNavigation)}</div>
+                    <div className="space-y-1">
+                        {renderNavItems(mainNavigation)}
+                    </div>
+                    <div className="space-y-1">
+                        {renderNavItems(bottomNavigation)}
+                    </div>
                 </nav>
             </aside>
         </>

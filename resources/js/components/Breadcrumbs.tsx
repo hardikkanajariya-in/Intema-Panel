@@ -1,8 +1,8 @@
 import { Link } from '@inertiajs/react';
 
 import { ChevronRight } from '@/components/Icons';
-import type { BreadcrumbItem } from '@/types/navigation';
 import { cn } from '@/lib/utils';
+import type { BreadcrumbItem } from '@/types/navigation';
 
 interface BreadcrumbsProps {
     items: BreadcrumbItem[];
@@ -11,17 +11,28 @@ interface BreadcrumbsProps {
 
 export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
     return (
-        <nav aria-label="Breadcrumb" className={cn('flex items-center gap-1 text-sm', className)}>
+        <nav
+            aria-label="Breadcrumb"
+            className={cn('flex items-center gap-1 text-sm', className)}
+        >
             {items.map((item, index) => {
                 const isLast = index === items.length - 1;
 
                 return (
-                    <div key={`${item.title}-${index}`} className="flex items-center gap-1">
+                    <div
+                        key={`${item.title}-${index}`}
+                        className="flex items-center gap-1"
+                    >
                         {index > 0 ? (
-                            <ChevronRight size={14} className="text-muted-foreground" />
+                            <ChevronRight
+                                size={14}
+                                className="text-muted-foreground"
+                            />
                         ) : null}
                         {isLast || !item.href ? (
-                            <span className="font-medium text-foreground">{item.title}</span>
+                            <span className="font-medium text-foreground">
+                                {item.title}
+                            </span>
                         ) : (
                             <Link
                                 href={item.href}

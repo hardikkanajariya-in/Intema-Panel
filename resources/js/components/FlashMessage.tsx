@@ -44,7 +44,7 @@ export function FlashMessage() {
     return (
         <div
             className={cn(
-                'fixed right-4 top-4 z-50 flex max-w-md items-start gap-3 rounded-lg border px-4 py-3 shadow-lg',
+                'fixed top-4 right-4 z-50 flex max-w-md items-start gap-3 rounded-lg border px-4 py-3 shadow-lg',
                 type === 'success'
                     ? 'border-success/30 bg-success/10 text-success'
                     : 'border-destructive/30 bg-destructive/10 text-destructive',

@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
-import { type ReactNode, useEffect, useState } from 'react';
+import {  useEffect, useState } from 'react';
+import type {ReactNode} from 'react';
 
 import { FlashMessage } from '@/components/FlashMessage';
 import { Header } from '@/components/Header';

@@ -4,7 +4,6 @@ namespace App\Provision\Tasks;
 
 use App\Provision\Engine\ProvisionContext;
 use App\Provision\Engine\TaskResult;
-use App\Services\PostgresService;
 use Illuminate\Support\Facades\File;
 
 class CreateFolderTask extends AbstractTask

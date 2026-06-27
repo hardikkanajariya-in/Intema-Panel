@@ -1,9 +1,15 @@
 import { Head, useForm } from '@inertiajs/react';
-import { type FormEvent, type ReactNode } from 'react';
+import type {FormEvent, ReactNode} from 'react';
 
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Select } from '@/components/ui/Select';
@@ -15,8 +21,12 @@ interface SettingsIndexProps {
     timezones: string[];
 }
 
-export default function SettingsIndex({ settings, timezones }: SettingsIndexProps) {
-    const { data, setData, put, processing, errors } = useForm<PanelSettings>(settings);
+export default function SettingsIndex({
+    settings,
+    timezones,
+}: SettingsIndexProps) {
+    const { data, setData, put, processing, errors } =
+        useForm<PanelSettings>(settings);
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -40,47 +50,84 @@ export default function SettingsIndex({ settings, timezones }: SettingsIndexProp
                 <Card>
                     <CardHeader>
                         <CardTitle>Branding</CardTitle>
-                        <CardDescription>Panel identity and contact information</CardDescription>
+                        <CardDescription>
+                            Panel identity and contact information
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 sm:grid-cols-2">
-                        <Field label="Panel Name" id="panel_name" required error={errors.panel_name}>
+                        <Field
+                            label="Panel Name"
+                            id="panel_name"
+                            required
+                            error={errors.panel_name}
+                        >
                             <Input
                                 id="panel_name"
                                 value={data.panel_name}
-                                onChange={(e) => setData('panel_name', e.target.value)}
+                                onChange={(e) =>
+                                    setData('panel_name', e.target.value)
+                                }
                                 error={errors.panel_name}
                             />
                         </Field>
-                        <Field label="Company Name" id="company_name" required error={errors.company_name}>
+                        <Field
+                            label="Company Name"
+                            id="company_name"
+                            required
+                            error={errors.company_name}
+                        >
                             <Input
                                 id="company_name"
                                 value={data.company_name}
-                                onChange={(e) => setData('company_name', e.target.value)}
+                                onChange={(e) =>
+                                    setData('company_name', e.target.value)
+                                }
                                 error={errors.company_name}
                             />
                         </Field>
-                        <Field label="Website" id="website" required error={errors.website}>
+                        <Field
+                            label="Website"
+                            id="website"
+                            required
+                            error={errors.website}
+                        >
                             <Input
                                 id="website"
                                 value={data.website}
-                                onChange={(e) => setData('website', e.target.value)}
+                                onChange={(e) =>
+                                    setData('website', e.target.value)
+                                }
                                 error={errors.website}
                             />
                         </Field>
-                        <Field label="Support Email" id="support_email" required error={errors.support_email}>
+                        <Field
+                            label="Support Email"
+                            id="support_email"
+                            required
+                            error={errors.support_email}
+                        >
                             <Input
                                 id="support_email"
                                 type="email"
                                 value={data.support_email}
-                                onChange={(e) => setData('support_email', e.target.value)}
+                                onChange={(e) =>
+                                    setData('support_email', e.target.value)
+                                }
                                 error={errors.support_email}
                             />
                         </Field>
-                        <Field label="GitHub URL" id="github_url" required error={errors.github_url}>
+                        <Field
+                            label="GitHub URL"
+                            id="github_url"
+                            required
+                            error={errors.github_url}
+                        >
                             <Input
                                 id="github_url"
                                 value={data.github_url}
-                                onChange={(e) => setData('github_url', e.target.value)}
+                                onChange={(e) =>
+                                    setData('github_url', e.target.value)
+                                }
                                 error={errors.github_url}
                             />
                         </Field>
@@ -90,14 +137,23 @@ export default function SettingsIndex({ settings, timezones }: SettingsIndexProp
                 <Card>
                     <CardHeader>
                         <CardTitle>Defaults</CardTitle>
-                        <CardDescription>Regional and provisioning defaults</CardDescription>
+                        <CardDescription>
+                            Regional and provisioning defaults
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 sm:grid-cols-2">
-                        <Field label="Timezone" id="timezone" required error={errors.timezone}>
+                        <Field
+                            label="Timezone"
+                            id="timezone"
+                            required
+                            error={errors.timezone}
+                        >
                             <Select
                                 id="timezone"
                                 value={data.timezone}
-                                onChange={(e) => setData('timezone', e.target.value)}
+                                onChange={(e) =>
+                                    setData('timezone', e.target.value)
+                                }
                                 error={errors.timezone}
                             >
                                 {timezones.map((timezone) => (
@@ -107,11 +163,18 @@ export default function SettingsIndex({ settings, timezones }: SettingsIndexProp
                                 ))}
                             </Select>
                         </Field>
-                        <Field label="Theme" id="theme" required error={errors.theme}>
+                        <Field
+                            label="Theme"
+                            id="theme"
+                            required
+                            error={errors.theme}
+                        >
                             <Select
                                 id="theme"
                                 value={data.theme}
-                                onChange={(e) => setData('theme', e.target.value)}
+                                onChange={(e) =>
+                                    setData('theme', e.target.value)
+                                }
                                 error={errors.theme}
                             >
                                 <option value="system">System</option>
@@ -128,7 +191,12 @@ export default function SettingsIndex({ settings, timezones }: SettingsIndexProp
                             <Input
                                 id="default_database_prefix"
                                 value={data.default_database_prefix}
-                                onChange={(e) => setData('default_database_prefix', e.target.value)}
+                                onChange={(e) =>
+                                    setData(
+                                        'default_database_prefix',
+                                        e.target.value,
+                                    )
+                                }
                                 error={errors.default_database_prefix}
                             />
                         </Field>
@@ -141,7 +209,12 @@ export default function SettingsIndex({ settings, timezones }: SettingsIndexProp
                             <Select
                                 id="default_resource_status"
                                 value={data.default_resource_status}
-                                onChange={(e) => setData('default_resource_status', e.target.value)}
+                                onChange={(e) =>
+                                    setData(
+                                        'default_resource_status',
+                                        e.target.value,
+                                    )
+                                }
                                 error={errors.default_resource_status}
                             >
                                 <option value="active">Active</option>
