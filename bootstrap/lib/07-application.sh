@@ -13,11 +13,26 @@ needs_development_build() {
     [[ "${INSTALL_MODE}" == "development" ]] && ! is_built_package
 }
 
+update_env_key() {
+    local key="$1"
+    local value="$2"
+    if grep -qE "^${key}=" .env; then
+        sed -i "s|^${key}=.*|${key}=\"${value}\"|" .env
+    else
+        echo "${key}=\"${value}\"" >> .env
+    fi
+}
+
 configure_application() {
     cd "${APP_DIR}"
 
     if [[ ! -f .env ]]; then
         cp .env.example .env
+    fi
+
+    if [[ -n "${PANEL_DOMAIN:-}" ]]; then
+        update_env_key "APP_URL" "https://${PANEL_DOMAIN}"
+        update_env_key "PANEL_SERVER_NAME" "${PANEL_DOMAIN}"
     fi
 
     if ! grep -qE '^APP_KEY=base64:' .env 2>/dev/null; then

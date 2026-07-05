@@ -27,11 +27,16 @@ Created by [Hardik Kanajariya](https://hardikkanajariya.in).
 - Nginx
 - Linux server (Ubuntu/Debian recommended)
 
-## Quick Install (Ubuntu 24.04 LTS)
+## Quick Install (Ubuntu 24.04 / 26.04 LTS)
+
+Ensure your domain name (e.g., `panel.example.com`) is pointing to your server's IP address, then run:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hardikkanajariya-in/Intema-Panel/main/bootstrap.sh | sudo bash
 ```
+
+*Note: The script will prompt you for your domain name to configure Nginx and attempt automatic SSL generation. You can also pass the domain name directly via a CLI flag:*
+`curl -fsSL https://raw.githubusercontent.com/hardikkanajariya-in/Intema-Panel/main/bootstrap.sh | sudo bash -s -- --domain=panel.example.com`
 
 Or clone and run:
 
@@ -39,10 +44,18 @@ Or clone and run:
 git clone https://github.com/hardikkanajariya/intema-panel.git
 cd intema-panel
 sudo chmod +x bootstrap/install.sh bin/intema scripts/*.sh
-sudo ./bootstrap/install.sh
+sudo ./bootstrap.sh --domain=panel.example.com
 ```
 
-Open `http://SERVER-IP` and complete the **Setup Wizard**.
+Open `https://panel.example.com` (or `http://panel.example.com` if SSL setup was bypassed) and complete the **Setup Wizard**.
+
+## Update
+
+To update the panel to the latest version without losing any configuration or database data:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hardikkanajariya-in/Intema-Panel/main/bootstrap.sh | sudo bash -s -- --upgrade -y
+```
 
 ## CLI
 

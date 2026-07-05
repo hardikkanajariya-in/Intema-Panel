@@ -2,13 +2,16 @@
 set -euo pipefail
 
 readonly APP_DIR="${PANEL_INSTALL_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-readonly SERVER_NAME="${PANEL_SERVER_NAME:-_}"
+if [[ -z "${PANEL_DOMAIN:-}" ]]; then
+    echo "ERROR: PANEL_DOMAIN is required to configure the Nginx virtual host." >&2
+    exit 1
+fi
 
 cat > /etc/nginx/sites-available/intema-panel <<EOF
 server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    server_name ${SERVER_NAME};
+    listen 80;
+    listen [::]:80;
+    server_name ${PANEL_DOMAIN};
     root ${APP_DIR}/public;
     index index.php;
 
@@ -32,6 +35,16 @@ systemctl restart php8.4-fpm
 ufw allow OpenSSH
 ufw allow 'Nginx Full'
 ufw --force enable
+
+if command -v certbot >/dev/null 2>&1; then
+    echo "Attempting to obtain SSL certificate for ${PANEL_DOMAIN} using Certbot..."
+    if certbot --nginx -d "${PANEL_DOMAIN}" --non-interactive --agree-tos --register-unsafely-without-email --redirect; then
+        echo "SSL certificate installed successfully."
+    else
+        echo "WARNING: Certbot failed to obtain a certificate. You can configure SSL later via the panel. Accessing the panel via http://${PANEL_DOMAIN} will still be active."
+    fi
+    systemctl reload nginx
+fi
 
 SWAP_SIZE="${PANEL_SWAP_SIZE:-2G}"
 if ! swapon --show | grep -q '/swapfile'; then

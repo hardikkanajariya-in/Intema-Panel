@@ -40,6 +40,7 @@ Usage:
 Options:
   --version=TAG     Install a specific release (e.g. v0.1.0)
   --branch=BRANCH   Development mode: use a Git branch archive
+  --domain=DOMAIN   Required: Domain name for the panel (e.g. panel.example.com)
   --upgrade         Upgrade an existing installation (preserves .env and database)
   --repair          Run repair on an existing installation
   -y, --yes         Non-interactive: assume yes for prompts
@@ -47,9 +48,9 @@ Options:
 
 Examples:
   curl -fsSL https://install.intemapanel.com | sudo bash
-  ./bootstrap.sh
-  ./bootstrap.sh --version=v1.0.0
-  ./bootstrap.sh --branch=main
+  ./bootstrap.sh --domain=panel.example.com
+  ./bootstrap.sh --version=v1.0.0 --domain=panel.example.com
+  ./bootstrap.sh --branch=main --domain=panel.example.com
   ./bootstrap.sh --upgrade -y
 EOF
 }
@@ -74,6 +75,14 @@ parse_args() {
                 INTEMA_BRANCH="${1:-}"
                 [[ -n "${INTEMA_BRANCH}" ]] || error "Missing value for --branch" 1
                 INTEMA_INSTALL_MODE="development"
+                ;;
+            --domain=*)
+                PANEL_DOMAIN="${1#*=}"
+                ;;
+            --domain)
+                shift
+                PANEL_DOMAIN="${1:-}"
+                [[ -n "${PANEL_DOMAIN}" ]] || error "Missing value for --domain" 1
                 ;;
             --upgrade)
                 INTEMA_ACTION="upgrade"
@@ -500,6 +509,25 @@ main() {
     parse_args "$@"
     require_root
     detect_ubuntu
+
+    if [[ "${INTEMA_ACTION}" == "install" ]] && ! installation_exists; then
+        local domain=""
+        if [[ -z "${PANEL_DOMAIN:-}" ]]; then
+            if [[ "${INTEMA_ASSUME_YES}" != "true" ]]; then
+                while [[ -z "${domain}" ]]; do
+                    read -r -p "[intema-bootstrap] Enter the domain name for the panel (e.g. panel.example.com) [REQUIRED]: " domain < /dev/tty
+                    if [[ -z "${domain}" ]]; then
+                        echo "[intema-bootstrap] ERROR: Domain name is required." >&2
+                    fi
+                done
+                export PANEL_DOMAIN="${domain}"
+            else
+                error "Domain name is required in non-interactive mode. Pass --domain=DOMAIN." 1
+            fi
+        else
+            export PANEL_DOMAIN="${PANEL_DOMAIN}"
+        fi
+    fi
 
     local local_repo=""
     if local_repo="$(detect_local_repository)"; then
