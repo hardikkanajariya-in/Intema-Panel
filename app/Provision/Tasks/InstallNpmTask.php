@@ -29,8 +29,21 @@ class InstallNpmTask extends AbstractTask
             return TaskResult::success('Skipped NPM install (no package.json).');
         }
 
-        $this->shellService->runSystem('npm', ['ci', '--no-audit', '--no-fund'], cwd: $path);
+        $hasPnpmLock = is_file($path.'/pnpm-lock.yaml');
+        $hasPnpm = false;
+        try {
+            $this->shellService->runSystem('which', ['pnpm']);
+            $hasPnpm = true;
+        } catch (\Throwable) {}
 
-        return TaskResult::success('NPM dependencies installed.');
+        if ($hasPnpmLock || $hasPnpm) {
+            $this->shellService->runSystem('pnpm', ['install'], cwd: $path);
+            $msg = 'pnpm dependencies installed.';
+        } else {
+            $this->shellService->runSystem('npm', ['install'], cwd: $path);
+            $msg = 'NPM dependencies installed.';
+        }
+
+        return TaskResult::success($msg);
     }
 }

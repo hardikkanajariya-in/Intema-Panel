@@ -28,7 +28,7 @@ class NginxService
             ->all();
     }
 
-    public function createVirtualHost(string $domain, string $root, ?string $phpSocket = null): ShellResult
+    public function createVirtualHost(string $domain, string $root, ?string $phpSocket = null, ?string $proxyPort = null): ShellResult
     {
         $phpSocket ??= 'unix:/run/php/php8.4-fpm.sock';
 
@@ -37,6 +37,7 @@ class NginxService
             $domain,
             $root,
             $phpSocket,
+            $proxyPort ?: '',
         ]);
     }
 

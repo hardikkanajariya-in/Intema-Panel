@@ -34,6 +34,8 @@ enum ApplicationType: string
             self::StaticWebsite,
             self::Laravel,
             self::StandardPhp,
+            self::NextJs,
+            self::NestJs,
             self::ApiOnly,
             self::Custom,
         ];
@@ -44,9 +46,6 @@ enum ApplicationType: string
      */
     public static function metadataOnly(): array
     {
-        return [
-            self::NextJs,
-            self::NestJs,
-        ];
+        return [];
     }
 }

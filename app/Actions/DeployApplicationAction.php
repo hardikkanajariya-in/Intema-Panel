@@ -7,14 +7,16 @@ use App\Enums\ResourceStatus;
 use App\Models\Application;
 use App\Models\Deployment;
 use App\Provision\Engine\ProvisionContext;
-use App\Provision\Tasks\CloneRepositoryTask;
+use App\Provision\Engine\ProvisionEngine;
+use App\Provision\ProvisionerRegistry;
 use App\Services\ActivityLogService;
 use Illuminate\Support\Facades\DB;
 
 class DeployApplicationAction
 {
     public function __construct(
-        private readonly CloneRepositoryTask $cloneRepositoryTask,
+        private readonly ProvisionerRegistry $provisionerRegistry,
+        private readonly ProvisionEngine $engine,
         private readonly ActivityLogService $activityLogService,
     ) {}
 
@@ -28,13 +30,30 @@ class DeployApplicationAction
                 'deploy_path' => $application->deploy_path,
             ]);
 
+            $provisioner = $this->provisionerRegistry->forType($application->type);
+            $tasks = $provisioner->getTasks();
+
+            // Extract primary domain and document root from domains or metadata
+            $domainModel = $application->domains()->first();
+            $domain = $domainModel ? $domainModel->hostname : ($application->metadata['domain'] ?? '');
+            $docRoot = $domainModel && $domainModel->document_root 
+                ? $domainModel->document_root 
+                : ($application->metadata['document_root'] ?? $application->deploy_path);
+
             $context = new ProvisionContext($application, [
+                'name' => $application->name,
+                'domain' => $domain,
+                'document_root' => $docRoot,
                 'repository_url' => $application->repository_url,
-                'deploy_path' => $application->deploy_path,
                 'repository_branch' => $application->repository_branch,
+                'deploy_path' => $application->deploy_path,
+                'runtime' => $application->runtime,
+                'build_command' => $application->build_command,
+                'start_command' => $application->start_command,
+                'linux_user' => $application->linux_user,
             ]);
 
-            $result = $this->cloneRepositoryTask->execute($context);
+            $result = $this->engine->execute($context, $tasks);
 
             if (! $result->success) {
                 $deployment->update([

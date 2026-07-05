@@ -18,7 +18,10 @@ use App\Provision\Tasks\EnableSiteTask;
 use App\Provision\Tasks\GenerateAppKeyTask;
 use App\Provision\Tasks\HealthCheckTask;
 use App\Provision\Tasks\InstallComposerTask;
+use App\Provision\Tasks\InstallNpmTask;
+use App\Provision\Tasks\CreateSupervisorConfigTask;
 use App\Provision\Tasks\ReloadNginxTask;
+use App\Provision\Tasks\RunBuildCommandTask;
 use App\Provision\Tasks\RunMigrationsTask;
 use App\Provision\Tasks\SaveMetadataTask;
 use App\Provision\Tasks\SetPermissionsTask;
@@ -32,6 +35,9 @@ abstract class AbstractApplicationProvisioner implements ApplicationProvisionerI
         protected readonly CreateLinuxUserTask $createLinuxUserTask,
         protected readonly CloneRepositoryTask $cloneRepositoryTask,
         protected readonly InstallComposerTask $installComposerTask,
+        protected readonly InstallNpmTask $installNpmTask,
+        protected readonly RunBuildCommandTask $runBuildCommandTask,
+        protected readonly CreateSupervisorConfigTask $createSupervisorConfigTask,
         protected readonly CreateEnvTask $createEnvTask,
         protected readonly GenerateAppKeyTask $generateAppKeyTask,
         protected readonly RunMigrationsTask $runMigrationsTask,
@@ -57,6 +63,14 @@ abstract class AbstractApplicationProvisioner implements ApplicationProvisionerI
         }
 
         return $errors;
+    }
+
+    /**
+     * @return list<TaskInterface>
+     */
+    public function getTasks(): array
+    {
+        return $this->provisionTasks();
     }
 
     public function provision(Application $application, array $input = []): ProvisionResult

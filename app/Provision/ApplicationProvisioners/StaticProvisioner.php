@@ -21,6 +21,8 @@ class StaticProvisioner extends AbstractApplicationProvisioner
         return [
             $this->createFolderTask,
             $this->cloneRepositoryTask,
+            $this->installNpmTask,
+            $this->runBuildCommandTask,
             $this->createVirtualHostTask,
             $this->enableSiteTask,
             $this->reloadNginxTask,

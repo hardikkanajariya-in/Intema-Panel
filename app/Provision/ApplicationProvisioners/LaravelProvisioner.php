@@ -29,6 +29,8 @@ class LaravelProvisioner extends AbstractApplicationProvisioner
             $this->createLinuxUserTask,
             $this->cloneRepositoryTask,
             $this->installComposerTask,
+            $this->installNpmTask,
+            $this->runBuildCommandTask,
             $this->createEnvTask,
             $this->generateAppKeyTask,
             $this->runMigrationsTask,

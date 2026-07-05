@@ -7,6 +7,7 @@ SITE_NAME="${1:-}"
 DOMAIN="${2:-}"
 ROOT="${3:-}"
 PHP_SOCKET="${4:-unix:/run/php/php8.4-fpm.sock}"
+PROXY_PORT="${5:-}"
 
 SITES_AVAILABLE="${PANEL_NGINX_SITES_AVAILABLE:-/etc/nginx/sites-available}"
 
@@ -27,6 +28,32 @@ if [[ -f "${CONFIG}" ]]; then
     exit 0
 fi
 
+if [[ -n "${PROXY_PORT}" ]]; then
+cat > "${CONFIG}" <<EOF
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+    root ${ROOT};
+
+    location / {
+        proxy_pass http://127.0.0.1:${PROXY_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOF
+else
 cat > "${CONFIG}" <<EOF
 server {
     listen 80;
@@ -49,6 +76,7 @@ server {
     }
 }
 EOF
+fi
 
 echo "Virtual host created: ${SITE_NAME}"
 exit 0
