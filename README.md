@@ -30,7 +30,7 @@ Created by [Hardik Kanajariya](https://hardikkanajariya.in).
 ## Quick Install (Ubuntu 24.04 LTS)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hardikkanajariya/intema-panel/main/bootstrap/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/hardikkanajariya-in/Intema-Panel/main/bootstrap.sh | sudo bash
 ```
 
 Or clone and run:
