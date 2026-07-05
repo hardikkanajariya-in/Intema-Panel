@@ -202,6 +202,13 @@ export default function FilesIndex({ path, entries, error }: FilesIndexProps) {
                     <div className="flex gap-2">
                         <Button
                             variant="outline"
+                            onClick={() => router.reload()}
+                            title="Refresh folder contents"
+                        >
+                            Refresh
+                        </Button>
+                        <Button
+                            variant="outline"
                             onClick={() => {
                                 setShowNewFolderInput(true);
                                 setShowNewFileInput(false);

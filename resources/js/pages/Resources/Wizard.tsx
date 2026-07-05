@@ -286,32 +286,70 @@ export default function ResourceWizard({
         })
         .then(async (res) => {
             clearInterval(timerId);
-            const resData = await res.json();
+            
+            const finalUrl = res.url || '';
+            const urlMatch = finalUrl.match(/\/(applications|databases|domains|ssl-certificates)\/([a-f0-9-]+)/i);
+            
+            let resourceUuid = '';
+            let resourceType = type;
+            if (urlMatch) {
+                const matchedTypeSegment = urlMatch[1];
+                resourceType = matchedTypeSegment === 'ssl-certificates' ? 'ssl' : matchedTypeSegment.slice(0, -1);
+                resourceUuid = urlMatch[2];
+            }
 
-            const resource = resData.props?.application || resData.props?.database || resData.props?.domain || resData.props?.sslCertificate;
+            let resData: any = null;
+            const text = await res.text();
+            try {
+                resData = JSON.parse(text);
+            } catch (e) {
+                // Not JSON (HTML page followed via redirect)
+            }
 
-            if (res.ok && resource) {
-                const isFailed = resource.status === 'failed' || resource.status_label?.toLowerCase().includes('failed');
+            if (res.ok) {
+                let resource = resData ? (resData.props?.application || resData.props?.database || resData.props?.domain || resData.props?.sslCertificate) : null;
                 
-                if (isFailed) {
-                    setProgressSteps((prev) => {
-                        const lastIndex = prev.length - 1;
-                        return prev.map((step, idx) => {
-                            if (idx === lastIndex) {
-                                return { ...step, status: 'failed' };
-                            }
-                            return { ...step, status: 'success' };
+                if (!resource && resourceUuid) {
+                    resource = {
+                        uuid: resourceUuid,
+                        status: 'active',
+                    };
+                }
+
+                if (resource) {
+                    const isFailed = resource.status === 'failed' || resource.status_label?.toLowerCase().includes('failed');
+                    
+                    if (isFailed) {
+                        setProgressSteps((prev) => {
+                            const lastIndex = prev.length - 1;
+                            return prev.map((step, idx) => {
+                                if (idx === lastIndex) {
+                                    return { ...step, status: 'failed' };
+                                }
+                                return { ...step, status: 'success' };
+                            });
                         });
-                    });
-                    setCreatedResource(resource);
-                    setProvisioningFailed(true);
-                    setErrorMsg('Resource was configured but background provisioning/deployment failed. Check logs on the details page.');
+                        setCreatedResource(resource);
+                        setProvisioningFailed(true);
+                        setErrorMsg('Resource was configured but background provisioning/deployment failed. Check logs on the details page.');
+                    } else {
+                        setProgressSteps((prev) =>
+                            prev.map((step) => ({ ...step, status: 'success' }))
+                        );
+                        setCreatedResource(resource);
+                        setProvisioningSuccess(true);
+                    }
                 } else {
-                    setProgressSteps((prev) =>
-                        prev.map((step) => ({ ...step, status: 'success' }))
-                    );
-                    setCreatedResource(resource);
-                    setProvisioningSuccess(true);
+                    setProgressSteps((prev) => {
+                        const activeStep = prev.find((s) => s.status === 'active') || prev.find((s) => s.status === 'pending');
+                        return prev.map((step) => 
+                            step.id === (activeStep?.id || prev[prev.length - 1]?.id) 
+                                ? { ...step, status: 'failed' } 
+                                : step
+                        );
+                    });
+                    setProvisioningFailed(true);
+                    setErrorMsg('Setup completed but details could not be parsed. Click View Details to inspect.');
                 }
             } else {
                 setProgressSteps((prev) => {
@@ -323,14 +361,16 @@ export default function ResourceWizard({
                     );
                 });
                 setProvisioningFailed(true);
-                const errorsList = resData.props?.errors 
+                const errorsList = resData?.props?.errors 
                     ? Object.values(resData.props.errors).flat().join('\n') 
-                    : (resData.message || 'An error occurred during provisioning.');
+                    : (resData?.message || 'An error occurred during provisioning.');
                 setErrorMsg(errorsList);
 
-                const fallbackResource = resData.props?.errors ? null : (resData.props?.application || resData.props?.database || resData.props?.domain || resData.props?.sslCertificate);
+                const fallbackResource = resData?.props?.errors ? null : (resData?.props?.application || resData?.props?.database || resData?.props?.domain || resData?.props?.sslCertificate);
                 if (fallbackResource) {
                     setCreatedResource(fallbackResource);
+                } else if (resourceUuid) {
+                    setCreatedResource({ uuid: resourceUuid });
                 }
             }
         })
