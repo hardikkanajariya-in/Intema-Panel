@@ -5,6 +5,7 @@ use App\Http\Controllers\AppearanceController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DnsRecordController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\GithubWebhookController;
@@ -62,6 +63,9 @@ Route::middleware('setup')->group(function () {
         Route::resource('domains', DomainController::class)->only(['index', 'show', 'destroy']);
         Route::post('/domains/{domain}/attach-ssl', [DomainController::class, 'attachSsl'])->name('domains.attach-ssl');
         Route::delete('/domains/{domain}/detach-ssl', [DomainController::class, 'detachSsl'])->name('domains.detach-ssl');
+        Route::get('/domains/{domain}/dns-records', [DnsRecordController::class, 'index'])->name('domains.dns.index');
+        Route::post('/domains/{domain}/dns-records', [DnsRecordController::class, 'store'])->name('domains.dns.store');
+        Route::delete('/domains/{domain}/dns-records/{recordId}', [DnsRecordController::class, 'destroy'])->name('domains.dns.destroy');
 
         Route::resource('ssl-certificates', SslCertificateController::class)->only(['index', 'show', 'destroy']);
         Route::post('/ssl-certificates/{ssl_certificate}/renew', [SslCertificateController::class, 'renew'])->name('ssl-certificates.renew');

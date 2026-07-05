@@ -15,6 +15,7 @@ export interface PanelSettings {
     timezone: string;
     theme?: string;
     github_token?: string;
+    cloudflare_token?: string;
     default_database_prefix: string;
     default_resource_status?: string;
 }

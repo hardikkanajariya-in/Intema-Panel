@@ -102,6 +102,22 @@ export default function SettingsIndex({
                                 error={errors.github_token}
                             />
                         </Field>
+                        <Field
+                            label="Cloudflare API Token (for DNS records management)"
+                            id="cloudflare_token"
+                            error={errors.cloudflare_token}
+                        >
+                            <Input
+                                id="cloudflare_token"
+                                type="password"
+                                placeholder="Cloudflare API Token"
+                                value={data.cloudflare_token || ''}
+                                onChange={(e) =>
+                                    setData('cloudflare_token', e.target.value)
+                                }
+                                error={errors.cloudflare_token}
+                            />
+                        </Field>
                     </CardContent>
                 </Card>
 

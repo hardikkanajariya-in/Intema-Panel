@@ -53,12 +53,15 @@ class DomainController extends Controller
             ->orderBy('domain_name')
             ->get();
 
+        $cloudflareConfigured = ! empty(app(\App\Services\SettingService::class)->get('cloudflare_token'));
+
         return Inertia::render('Domains/Show', [
             'domain' => DomainResource::make($domain)->resolve(),
             'sslCertificate' => $domain->sslCertificate
                 ? SslCertificateResource::make($domain->sslCertificate)->resolve()
                 : null,
             'availableCertificates' => SslCertificateResource::collection($availableCertificates)->resolve(),
+            'cloudflareConfigured' => $cloudflareConfigured,
         ]);
     }
 

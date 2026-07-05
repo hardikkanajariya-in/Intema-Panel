@@ -24,6 +24,7 @@ class UpdateSettingsRequest extends FormRequest
             'support_email' => ['required', 'email', 'max:255'],
             'timezone' => ['required', 'string', 'timezone:all'],
             'github_token' => ['nullable', 'string', 'max:255'],
+            'cloudflare_token' => ['nullable', 'string', 'max:255'],
             'default_database_prefix' => ['required', 'string', 'max:32', 'regex:/^[a-z][a-z0-9_]*$/'],
         ];
     }

@@ -107,12 +107,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 </nav>
 
                 <div className="border-t border-border p-4 text-center text-xs text-muted-foreground bg-sidebar">
-                    <p className="font-semibold">
-                        {panel.name} v{panel.version}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
-                        {panel.license} License
-                    </p>
                     <p className="mt-1.5 text-[10px] leading-relaxed">
                         Built with ❤️ by{' '}
                         <a
@@ -123,17 +117,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                         >
                             Hardik Kanajariya
                         </a>
-                        <br />
-                        <span className="text-[9px] text-muted-foreground">
-                            (<a
-                                href="https://github.com/hardik-kanajariya"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:underline text-muted-foreground"
-                            >
-                                @hardik-kanajariya
-                            </a>)
-                        </span>
                     </p>
                 </div>
             </aside>
