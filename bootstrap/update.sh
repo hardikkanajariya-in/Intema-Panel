@@ -24,9 +24,10 @@ fi
 
 pnpm install --frozen-lockfile 2>/dev/null || pnpm install
 php artisan migrate --force
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
+chmod +x scripts/*.sh bootstrap/*.sh bin/intema 2>/dev/null || true
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 pnpm run build
 pnpm store prune || true
 systemctl reload php8.4-fpm 2>/dev/null || true
