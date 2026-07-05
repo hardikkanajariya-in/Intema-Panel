@@ -130,12 +130,12 @@ class ShellService
      */
     private function postgresEnvironment(): array
     {
-        $environment = [
+        $environment = array_merge($_SERVER, [
             'PGHOST' => (string) config('panel.postgres.host'),
             'PGPORT' => (string) config('panel.postgres.port'),
             'PGUSER' => (string) config('panel.postgres.admin_user'),
             'HOME' => '/tmp',
-        ];
+        ]);
 
         $password = config('panel.postgres.admin_password');
 

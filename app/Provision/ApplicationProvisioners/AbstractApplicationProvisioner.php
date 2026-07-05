@@ -222,14 +222,20 @@ abstract class AbstractApplicationProvisioner implements ApplicationProvisionerI
         ]);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     protected function contextDataFromApplication(Application $application): array
     {
+        $domainModel = $application->domains()->first();
+        $domain = $domainModel ? $domainModel->hostname : ($application->metadata['domain'] ?? '');
+        $docRoot = $domainModel && $domainModel->document_root 
+            ? $domainModel->document_root 
+            : ($application->metadata['document_root'] ?? $this->defaultDocumentRoot($application->deploy_path));
+
         return [
             'linux_user' => $application->linux_user,
             'deploy_path' => $application->deploy_path,
+            'folder_path' => $application->deploy_path,
+            'domain' => $domain,
+            'document_root' => $docRoot,
             'repository_url' => $application->repository_url,
             'repository_branch' => $application->repository_branch,
             'environment_variables' => $application->environment_variables,
