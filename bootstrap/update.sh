@@ -8,7 +8,13 @@ readonly APP_DIR="${PANEL_INSTALL_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.."
 log "Updating Intema Panel at ${APP_DIR}"
 cd "${APP_DIR}"
 
-git pull --ff-only 2>/dev/null || log "Skipping git pull (not a git repository)"
+if [[ ! -d "${APP_DIR}/.git" ]]; then
+    log "Non-git installation detected. Downloading and running the installer in upgrade mode..."
+    curl -fsSL https://raw.githubusercontent.com/hardikkanajariya-in/Intema-Panel/main/bootstrap.sh | bash -s -- --upgrade -y
+    exit 0
+fi
+
+git pull --ff-only
 composer install --no-dev --optimize-autoloader --no-interaction
 
 if ! command -v pnpm >/dev/null 2>&1; then

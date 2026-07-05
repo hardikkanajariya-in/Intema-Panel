@@ -49,18 +49,18 @@ sudo ./bootstrap.sh --domain=panel.example.com
 
 Open `https://panel.example.com` (or `http://panel.example.com` if SSL setup was bypassed) and complete the **Setup Wizard**.
 
-## Update
-
-To update the panel to the latest version without losing any configuration or database data:
+To update the panel to the latest version without losing any configuration or database data, simply run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hardikkanajariya-in/Intema-Panel/main/bootstrap.sh | sudo bash -s -- --upgrade -y
+intema update
 ```
+
+(Or `/opt/intema-panel/bin/intema update` if you haven't linked the CLI globally yet).
 
 ## CLI
 
 ```bash
-sudo ln -sf /var/www/intema-panel/bin/intema /usr/local/bin/intema
+sudo ln -sf /opt/intema-panel/bin/intema /usr/local/bin/intema
 intema install    # Full server bootstrap (idempotent)
 intema update     # Update panel
 intema doctor     # Health checks
