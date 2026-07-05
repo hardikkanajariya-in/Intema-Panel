@@ -26,7 +26,7 @@ class SslCertificateController extends Controller
 
         return Inertia::render('SSL/Index', [
             'certificates' => [
-                'data' => SslCertificateResource::collection($certificates->items()),
+                'data' => SslCertificateResource::collection($certificates->items())->resolve(),
                 'links' => $certificates->linkCollection()->toArray(),
                 'meta' => [
                     'current_page' => $certificates->currentPage(),

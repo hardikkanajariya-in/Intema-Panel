@@ -19,7 +19,7 @@ class ActivityLogController extends Controller
 
         return Inertia::render('ActivityLogs/Index', [
             'logs' => [
-                'data' => ActivityLogResource::collection($logs->items()),
+                'data' => ActivityLogResource::collection($logs->items())->resolve(),
                 'links' => $logs->linkCollection()->toArray(),
                 'meta' => [
                     'current_page' => $logs->currentPage(),

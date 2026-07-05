@@ -49,14 +49,14 @@ class ResourceWizardController extends Controller
             'step' => $step,
             'selectedProject' => $project ? ProjectResource::make($project) : null,
             'resourceType' => $resourceType,
-            'projects' => ProjectResource::collection(Project::query()->orderBy('name')->get()),
+            'projects' => ProjectResource::collection(Project::query()->orderBy('name')->get())->resolve(),
             'applicationTypes' => $this->provisionerRegistry->types(),
             'applications' => ApplicationResource::collection(
                 Application::query()->orderBy('name')->get(),
-            ),
+            )->resolve(),
             'domains' => DomainResource::collection(
                 Domain::query()->orderBy('hostname')->get(),
-            ),
+            )->resolve(),
         ]);
     }
 

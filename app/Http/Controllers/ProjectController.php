@@ -38,7 +38,7 @@ class ProjectController extends Controller
 
         return Inertia::render('Projects/Index', [
             'projects' => [
-                'data' => ProjectResource::collection($projects->items()),
+                'data' => ProjectResource::collection($projects->items())->resolve(),
                 'links' => $projects->linkCollection()->toArray(),
                 'meta' => [
                     'current_page' => $projects->currentPage(),
@@ -81,9 +81,9 @@ class ProjectController extends Controller
 
         return Inertia::render('Projects/Show', [
             'project' => ProjectResource::make($project),
-            'applications' => ApplicationResource::collection($project->applications),
-            'databases' => ManagedDatabaseResource::collection($project->databases),
-            'domains' => DomainResource::collection($project->domains),
+            'applications' => ApplicationResource::collection($project->applications)->resolve(),
+            'databases' => ManagedDatabaseResource::collection($project->databases)->resolve(),
+            'domains' => DomainResource::collection($project->domains)->resolve(),
         ]);
     }
 

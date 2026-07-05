@@ -75,9 +75,13 @@ Route::middleware('setup')->group(function () {
         Route::post('/system/action', [SystemController::class, 'action'])->name('system.action');
 
         Route::get('/files', [FileManagerController::class, 'index'])->name('files.index');
-        Route::get('/files/show/{path}', [FileManagerController::class, 'show'])->where('path', '.*')->name('files.show');
-        Route::put('/files/{path}', [FileManagerController::class, 'update'])->where('path', '.*')->name('files.update');
-        Route::get('/files/download/{path}', [FileManagerController::class, 'download'])->where('path', '.*')->name('files.download');
+        Route::get('/files/show', [FileManagerController::class, 'show'])->name('files.show');
+        Route::put('/files', [FileManagerController::class, 'update'])->name('files.update');
+        Route::get('/files/download', [FileManagerController::class, 'download'])->name('files.download');
+        Route::post('/files/create-directory', [FileManagerController::class, 'createDirectory'])->name('files.create-directory');
+        Route::post('/files/create-file', [FileManagerController::class, 'createFile'])->name('files.create-file');
+        Route::delete('/files', [FileManagerController::class, 'delete'])->name('files.delete');
+        Route::post('/files/rename', [FileManagerController::class, 'rename'])->name('files.rename');
 
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

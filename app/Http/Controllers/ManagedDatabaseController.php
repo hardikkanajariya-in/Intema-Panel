@@ -29,7 +29,7 @@ class ManagedDatabaseController extends Controller
 
         return Inertia::render('Databases/Index', [
             'databases' => [
-                'data' => ManagedDatabaseResource::collection($databases->items()),
+                'data' => ManagedDatabaseResource::collection($databases->items())->resolve(),
                 'links' => $databases->linkCollection()->toArray(),
                 'meta' => [
                     'current_page' => $databases->currentPage(),
