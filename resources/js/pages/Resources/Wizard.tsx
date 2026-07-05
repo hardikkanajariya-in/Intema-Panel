@@ -57,6 +57,57 @@ export default function ResourceWizard({
     const [projectUuid, setProjectUuid] = useState(selectedProject?.uuid ?? '');
     const [type, setType] = useState(resourceType ?? '');
 
+    // Progress Modal States
+    const [showProgressModal, setShowProgressModal] = useState(false);
+    const [provisioningSuccess, setProvisioningSuccess] = useState(false);
+    const [provisioningFailed, setProvisioningFailed] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [createdResource, setCreatedResource] = useState<any>(null);
+    const [progressSteps, setProgressSteps] = useState<any[]>([]);
+
+    const getInitialSteps = (resType: string) => {
+        if (resType === 'application') {
+            return [
+                { id: 'db', label: 'Save application configuration', status: 'pending' },
+                { id: 'workspace', label: 'Initialize system folder workspace', status: 'pending' },
+                { id: 'git', label: 'Clone Git repository', status: 'pending' },
+                { id: 'dependencies', label: 'Install dependencies & build assets', status: 'pending' },
+                { id: 'proxy', label: 'Configure Nginx reverse proxy & SSL', status: 'pending' },
+                { id: 'supervisor', label: 'Start Supervisor background worker', status: 'pending' },
+            ];
+        } else if (resType === 'database') {
+            return [
+                { id: 'db', label: 'Save database configuration', status: 'pending' },
+                { id: 'provision', label: 'Create database & user on PostgreSQL', status: 'pending' },
+            ];
+        } else if (resType === 'domain') {
+            return [
+                { id: 'db', label: 'Save domain configuration', status: 'pending' },
+                { id: 'provision', label: 'Configure Nginx server blocks & reload', status: 'pending' },
+            ];
+        } else {
+            return [
+                { id: 'db', label: 'Save SSL certificate configuration', status: 'pending' },
+                { id: 'provision', label: 'Request Let\'s Encrypt SSL via Certbot', status: 'pending' },
+            ];
+        }
+    };
+
+    const handleCloseModal = () => {
+        setShowProgressModal(false);
+        if (createdResource) {
+            if (type === 'application') {
+                router.visit(`/applications/${createdResource.uuid}`);
+            } else if (type === 'database') {
+                router.visit(`/databases/${createdResource.uuid}`);
+            } else if (type === 'domain') {
+                router.visit(`/domains/${createdResource.uuid}`);
+            } else {
+                router.visit(`/ssl-certificates/${createdResource.uuid}`);
+            }
+        }
+    };
+
     // GitHub Integration States
     const [githubRepos, setGithubRepos] = useState<GithubRepo[]>([]);
     const [githubBranches, setGithubBranches] = useState<string[]>([]);
@@ -161,14 +212,140 @@ export default function ResourceWizard({
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault();
-        router.post('/resources', {
-            ...data,
-            resource_type: type,
-            project_uuid: projectUuid || '',
-            document_root:
-                type === 'domain'
-                    ? data.document_root_domain
-                    : data.document_root,
+
+        setShowProgressModal(true);
+        setProvisioningSuccess(false);
+        setProvisioningFailed(false);
+        setErrorMsg(null);
+        setCreatedResource(null);
+
+        const initialSteps = getInitialSteps(type);
+        if (initialSteps[0]) {
+            initialSteps[0].status = 'active';
+        }
+        setProgressSteps(initialSteps);
+
+        let timerId: any = null;
+        let currentStepIndex = 0;
+
+        const updateStepStatus = (id: string, status: string) => {
+            setProgressSteps((prev) =>
+                prev.map((step) => (step.id === id ? { ...step, status } : step))
+            );
+        };
+
+        const startSimulation = () => {
+            timerId = setInterval(() => {
+                if (type === 'application') {
+                    if (currentStepIndex === 0) {
+                        updateStepStatus('db', 'success');
+                        updateStepStatus('workspace', 'active');
+                        currentStepIndex++;
+                    } else if (currentStepIndex === 1) {
+                        updateStepStatus('workspace', 'success');
+                        updateStepStatus('git', 'active');
+                        currentStepIndex++;
+                    } else if (currentStepIndex === 2) {
+                        updateStepStatus('git', 'success');
+                        updateStepStatus('dependencies', 'active');
+                        currentStepIndex++;
+                    } else if (currentStepIndex === 3) {
+                        clearInterval(timerId);
+                    }
+                } else {
+                    if (currentStepIndex === 0) {
+                        updateStepStatus('db', 'success');
+                        updateStepStatus('provision', 'active');
+                        currentStepIndex++;
+                    } else if (currentStepIndex === 1) {
+                        clearInterval(timerId);
+                    }
+                }
+            }, 2500);
+        };
+
+        startSimulation();
+
+        const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+        const docRoot = type === 'domain' ? data.document_root_domain : data.document_root;
+
+        fetch('/resources', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Inertia': 'true',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify({
+                ...data,
+                resource_type: type,
+                project_uuid: projectUuid || '',
+                document_root: docRoot,
+            }),
+        })
+        .then(async (res) => {
+            clearInterval(timerId);
+            const resData = await res.json();
+
+            const resource = resData.props?.application || resData.props?.database || resData.props?.domain || resData.props?.sslCertificate;
+
+            if (res.ok && resource) {
+                const isFailed = resource.status === 'failed' || resource.status_label?.toLowerCase().includes('failed');
+                
+                if (isFailed) {
+                    setProgressSteps((prev) => {
+                        const lastIndex = prev.length - 1;
+                        return prev.map((step, idx) => {
+                            if (idx === lastIndex) {
+                                return { ...step, status: 'failed' };
+                            }
+                            return { ...step, status: 'success' };
+                        });
+                    });
+                    setCreatedResource(resource);
+                    setProvisioningFailed(true);
+                    setErrorMsg('Resource was configured but background provisioning/deployment failed. Check logs on the details page.');
+                } else {
+                    setProgressSteps((prev) =>
+                        prev.map((step) => ({ ...step, status: 'success' }))
+                    );
+                    setCreatedResource(resource);
+                    setProvisioningSuccess(true);
+                }
+            } else {
+                setProgressSteps((prev) => {
+                    const activeStep = prev.find((s) => s.status === 'active') || prev.find((s) => s.status === 'pending');
+                    return prev.map((step) => 
+                        step.id === (activeStep?.id || prev[prev.length - 1]?.id) 
+                            ? { ...step, status: 'failed' } 
+                            : step
+                    );
+                });
+                setProvisioningFailed(true);
+                const errorsList = resData.props?.errors 
+                    ? Object.values(resData.props.errors).flat().join('\n') 
+                    : (resData.message || 'An error occurred during provisioning.');
+                setErrorMsg(errorsList);
+
+                const fallbackResource = resData.props?.errors ? null : (resData.props?.application || resData.props?.database || resData.props?.domain || resData.props?.sslCertificate);
+                if (fallbackResource) {
+                    setCreatedResource(fallbackResource);
+                }
+            }
+        })
+        .catch((err) => {
+            clearInterval(timerId);
+            setProgressSteps((prev) => {
+                const activeStep = prev.find((s) => s.status === 'active') || prev.find((s) => s.status === 'pending');
+                return prev.map((step) => 
+                    step.id === (activeStep?.id || prev[prev.length - 1]?.id) 
+                        ? { ...step, status: 'failed' } 
+                        : step
+                );
+            });
+            setProvisioningFailed(true);
+            setErrorMsg(err.message || 'Network error occurred.');
         });
     };
 
@@ -585,6 +762,81 @@ export default function ResourceWizard({
                         </Button>
                     </div>
                 </form>
+            )}
+
+            {showProgressModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-card border border-border rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="p-6 space-y-6">
+                            <div className="space-y-1">
+                                <h3 className="text-lg font-bold flex items-center gap-2">
+                                    {provisioningFailed ? (
+                                        <span className="text-destructive">Resource Provisioning Failed</span>
+                                    ) : provisioningSuccess ? (
+                                        <span className="text-success text-green-600 dark:text-green-400">Resource Created Successfully!</span>
+                                    ) : (
+                                        <span className="animate-pulse">Provisioning Resource...</span>
+                                    )}
+                                </h3>
+                                <p className="text-xs text-muted-foreground">
+                                    {provisioningFailed 
+                                        ? 'An error occurred during deployment, but the configuration was stored.' 
+                                        : provisioningSuccess 
+                                        ? 'All setup tasks successfully completed!'
+                                        : 'Please wait while we set up your resource on the server. This may take up to a minute.'
+                                    }
+                                </p>
+                            </div>
+                            
+                            <div className="space-y-3.5 bg-muted/40 border border-border/50 rounded-lg p-4">
+                                {progressSteps.map((step) => (
+                                    <div key={step.id} className="flex items-center justify-between text-sm">
+                                        <span className={
+                                            step.status === 'success' ? 'text-green-600 dark:text-green-400 font-medium' :
+                                            step.status === 'failed' ? 'text-destructive font-semibold animate-shake' :
+                                            step.status === 'active' ? 'text-primary font-semibold animate-pulse' :
+                                            'text-muted-foreground'
+                                        }>
+                                            {step.label}
+                                        </span>
+                                        <span className="flex items-center justify-center w-5 h-5 text-xs font-semibold">
+                                            {step.status === 'success' && (
+                                                <span className="text-green-600 dark:text-green-400">✓</span>
+                                            )}
+                                            {step.status === 'failed' && (
+                                                <span className="text-destructive font-bold">✗</span>
+                                            )}
+                                            {step.status === 'active' && (
+                                                <span className="animate-spin text-primary">⏳</span>
+                                            )}
+                                            {step.status === 'pending' && (
+                                                <span className="text-muted-foreground/50">○</span>
+                                            )}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {errorMsg && (
+                                <div className="bg-destructive/10 text-destructive text-xs p-3 rounded-lg border border-destructive/20 max-h-32 overflow-y-auto font-mono whitespace-pre-wrap">
+                                    <strong>Error details:</strong><br />
+                                    {errorMsg}
+                                </div>
+                            )}
+
+                            <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                                {(provisioningSuccess || provisioningFailed) && (
+                                    <Button 
+                                        onClick={handleCloseModal}
+                                        variant={provisioningSuccess ? 'default' : 'destructive'}
+                                    >
+                                        {provisioningSuccess ? 'Go to Details' : 'View Details & Logs'}
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </AppLayout>
     );
