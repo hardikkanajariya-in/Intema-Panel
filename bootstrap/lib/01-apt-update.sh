@@ -17,6 +17,7 @@ fi
 if [[ "${CODENAME}" == "resolute" ]]; then
     # Remove the broken PPA if it was added in previous failed runs
     rm -f /etc/apt/sources.list.d/*ondrej*php*.list
+    rm -f /etc/apt/sources.list.d/*ondrej*php*.sources
 fi
 
 apt-get update -y
