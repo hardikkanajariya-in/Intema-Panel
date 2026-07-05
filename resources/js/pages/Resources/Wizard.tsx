@@ -112,6 +112,13 @@ export default function ResourceWizard({
         if (!repo) return;
 
         const nameOnly = repo.name.split('/')[1];
+        const host = window.location.hostname;
+        const baseDomain = host.replace(/^(hpanel|panel)\./, '');
+        const suggestedDomain = `${nameOnly}.${baseDomain}`;
+        
+        const suggestedDocRoot = data.type === 'laravel' 
+            ? `/var/www/${nameOnly}/public` 
+            : `/var/www/${nameOnly}`;
 
         setData((prev) => ({
             ...prev,
@@ -119,6 +126,8 @@ export default function ResourceWizard({
             repository_url: repo.clone_url,
             repository_branch: repo.default_branch,
             deploy_path: `/var/www/${nameOnly}`,
+            domain: suggestedDomain,
+            document_root: suggestedDocRoot,
         }));
 
         setLoadingBranches(true);
@@ -317,37 +326,59 @@ export default function ResourceWizard({
                                 </div>
                             )}
 
-                            <div className="space-y-2">
-                                <Label>Name</Label>
-                                <Input
-                                    value={data.name}
-                                    onChange={(e) =>
-                                        setData('name', e.target.value)
-                                    }
-                                    placeholder="my-cool-app"
-                                />
-                                {errors.name && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.name}
-                                    </p>
-                                )}
-                            </div>
+                             <div className="space-y-2">
+                                 <Label>Name</Label>
+                                 <Input
+                                     value={data.name}
+                                     onChange={(e) => {
+                                         const nameOnly = e.target.value;
+                                         const host = window.location.hostname;
+                                         const baseDomain = host.replace(/^(hpanel|panel)\./, '');
+                                         const suggestedDomain = nameOnly ? `${nameOnly}.${baseDomain}` : '';
+                                         const suggestedDocRoot = nameOnly 
+                                             ? (data.type === 'laravel' ? `/var/www/${nameOnly}/public` : `/var/www/${nameOnly}`)
+                                             : '';
+                                         setData((prev) => ({
+                                             ...prev,
+                                             name: nameOnly,
+                                             deploy_path: nameOnly ? `/var/www/${nameOnly}` : '',
+                                             domain: suggestedDomain,
+                                             document_root: suggestedDocRoot,
+                                         }));
+                                     }}
+                                     placeholder="my-cool-app"
+                                 />
+                                 {errors.name && (
+                                     <p className="text-sm text-destructive">
+                                         {errors.name}
+                                     </p>
+                                 )}
+                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Framework</Label>
-                                <Select
-                                    value={data.type}
-                                    onChange={(e) =>
-                                        setData('type', e.target.value)
-                                    }
-                                >
-                                    {applicationTypes.map((t) => (
-                                        <option key={t.value} value={t.value}>
-                                            {t.label}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </div>
+                             <div className="space-y-2">
+                                 <Label>Framework</Label>
+                                 <Select
+                                     value={data.type}
+                                     onChange={(e) => {
+                                         const nextType = e.target.value;
+                                         const nameOnly = data.name;
+                                         const suggestedDocRoot = nameOnly 
+                                             ? (nextType === 'laravel' ? `/var/www/${nameOnly}/public` : `/var/www/${nameOnly}`)
+                                             : '';
+                                         setData((prev) => ({
+                                             ...prev,
+                                             type: nextType,
+                                             document_root: suggestedDocRoot,
+                                         }));
+                                     }}
+                                 >
+                                     {applicationTypes.map((t) => (
+                                         <option key={t.value} value={t.value}>
+                                             {t.label}
+                                         </option>
+                                     ))}
+                                 </Select>
+                             </div>
 
                             {isManualGit && (
                                 <>

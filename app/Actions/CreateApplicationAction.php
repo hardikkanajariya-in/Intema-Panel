@@ -91,15 +91,15 @@ class CreateApplicationAction
                 \Illuminate\Support\Facades\Log::warning("Failed to auto-register GitHub webhook: " . $e->getMessage());
             }
         } catch (Throwable $exception) {
+            $application->update(['status' => ResourceStatus::Failed]);
+
             $this->activityLogService->log(
                 action: 'application.provisioned',
-                description: 'Application provisioning failed.',
+                description: 'Application provisioning failed: ' . $exception->getMessage(),
                 status: 'failed',
                 subject: $application,
                 properties: ['error' => $exception->getMessage()],
             );
-
-            throw $exception;
         }
 
         return $application->fresh();
