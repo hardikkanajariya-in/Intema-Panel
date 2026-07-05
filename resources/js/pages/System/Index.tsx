@@ -1,4 +1,5 @@
 import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
 
 import { PageHeader } from '@/components/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -51,8 +52,19 @@ export default function SystemIndex({
     monitoring,
     components,
 }: SystemIndexProps) {
+    const [updating, setUpdating] = useState(false);
+
     const runAction = (component: string, action: string) => {
         router.post('/system/action', { component, action });
+    };
+
+    const runUpdate = () => {
+        if (window.confirm('Are you sure you want to update the Intema Panel? This will download/pull the latest code in the background.')) {
+            setUpdating(true);
+            router.post('/system/update', {}, {
+                onFinish: () => setUpdating(false)
+            });
+        }
     };
 
     return (
@@ -65,6 +77,11 @@ export default function SystemIndex({
                     { title: 'Dashboard', href: '/dashboard' },
                     { title: 'System' },
                 ]}
+                actions={
+                    <Button onClick={runUpdate} disabled={updating}>
+                        {updating ? 'Updating...' : 'Update Panel'}
+                    </Button>
+                }
             />
             <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard

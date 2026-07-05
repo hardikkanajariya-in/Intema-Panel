@@ -510,6 +510,22 @@ main() {
     require_root
     detect_ubuntu
 
+    # Try to load existing PANEL_DOMAIN from .env if present
+    if [[ -z "${PANEL_DOMAIN:-}" ]]; then
+        local target_env="${INTEMA_INSTALL_DIR}/.env"
+        if [[ ! -f "${target_env}" ]] && [[ -f "/opt/intema-panel/.env" ]]; then
+            target_env="/opt/intema-panel/.env"
+        fi
+
+        if [[ -f "${target_env}" ]]; then
+            local env_domain
+            env_domain="$(grep "^PANEL_SERVER_NAME=" "${target_env}" | cut -d'=' -f2- | tr -d '"'\'' ' || true)"
+            if [[ -n "${env_domain}" ]]; then
+                export PANEL_DOMAIN="${env_domain}"
+            fi
+        fi
+    fi
+
     if [[ "${INTEMA_ACTION}" == "install" ]] && ! installation_exists; then
         local domain=""
         if [[ -z "${PANEL_DOMAIN:-}" ]]; then

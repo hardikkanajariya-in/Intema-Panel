@@ -38,4 +38,20 @@ class SystemController extends Controller
 
         return back()->with('success', 'Service action completed successfully.');
     }
+
+    public function update(): RedirectResponse
+    {
+        $updateScript = base_path('bootstrap/update.sh');
+
+        if (! is_file($updateScript)) {
+            return back()->with('error', 'Update script not found.');
+        }
+
+        // Run update in background
+        $log = storage_path('logs/panel_update.log');
+        $command = "bash " . escapeshellarg($updateScript) . " > " . escapeshellarg($log) . " 2>&1 &";
+        exec($command);
+
+        return back()->with('success', 'Panel update triggered in the background. Please wait a few moments for the services to restart.');
+    }
 }
