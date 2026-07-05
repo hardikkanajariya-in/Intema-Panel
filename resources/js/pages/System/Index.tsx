@@ -41,6 +41,12 @@ interface MonitoringSnapshot {
     nginx: { version: string; status: string };
     postgresql: { version: string; status: string };
     laravel: string;
+    storageBreakdown?: {
+        apps: { bytes: number; formatted: string };
+        databases: { bytes: number; formatted: string };
+        logs: { bytes: number; formatted: string };
+        panel: { bytes: number; formatted: string };
+    };
 }
 
 interface SystemIndexProps {
@@ -106,34 +112,59 @@ export default function SystemIndex({
                 />
             </div>
             <div className="grid gap-6 lg:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Runtime</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2 text-sm">
-                        <Row
-                            label="Load Average"
-                            value={monitoring.loadAverage}
-                        />
-                        <Row
-                            label="Processes"
-                            value={String(monitoring.processes)}
-                        />
-                        <Row
-                            label="PHP"
-                            value={`${monitoring.php.version} (${monitoring.php.status})`}
-                        />
-                        <Row
-                            label="Nginx"
-                            value={`${monitoring.nginx.version} (${monitoring.nginx.status})`}
-                        />
-                        <Row
-                            label="PostgreSQL"
-                            value={`${monitoring.postgresql.version} (${monitoring.postgresql.status})`}
-                        />
-                        <Row label="Laravel" value={monitoring.laravel} />
-                    </CardContent>
-                </Card>
+                <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Runtime</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2 text-sm">
+                            <Row
+                                label="Load Average"
+                                value={monitoring.loadAverage}
+                            />
+                            <Row
+                                label="Processes"
+                                value={String(monitoring.processes)}
+                            />
+                            <Row
+                                label="PHP"
+                                value={`${monitoring.php.version} (${monitoring.php.status})`}
+                            />
+                            <Row
+                                label="Nginx"
+                                value={`${monitoring.nginx.version} (${monitoring.nginx.status})`}
+                            />
+                            <Row
+                                label="PostgreSQL"
+                                value={`${monitoring.postgresql.version} (${monitoring.postgresql.status})`}
+                            />
+                            <Row label="Laravel" value={monitoring.laravel} />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Storage Consumption</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2 text-sm">
+                            <Row
+                                label="User Applications (/var/www & apps)"
+                                value={monitoring.storageBreakdown?.apps?.formatted ?? '0 B'}
+                            />
+                            <Row
+                                label="Databases (/var/lib/postgresql)"
+                                value={monitoring.storageBreakdown?.databases?.formatted ?? '0 B'}
+                            />
+                            <Row
+                                label="System Logs (/var/log)"
+                                value={monitoring.storageBreakdown?.logs?.formatted ?? '0 B'}
+                            />
+                            <Row
+                                label="Intema Panel (/opt/intema-panel)"
+                                value={monitoring.storageBreakdown?.panel?.formatted ?? '0 B'}
+                            />
+                        </CardContent>
+                    </Card>
+                </div>
                 <Card>
                     <CardHeader>
                         <CardTitle>System Components</CardTitle>

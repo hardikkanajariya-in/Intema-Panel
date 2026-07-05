@@ -22,6 +22,22 @@ class FileManagerService
         }
 
         $entries = [];
+        $dirSizes = [];
+
+        if (DIRECTORY_SEPARATOR === '/' && is_readable($absolute)) {
+            // Run du to get sizes of all child folders/files in one command
+            exec("cd " . escapeshellarg($absolute) . " && du -sb ./* 2>/dev/null", $output, $status);
+            if ($status === 0) {
+                foreach ($output as $line) {
+                    $parts = preg_split('/\s+/', $line, 2);
+                    if (count($parts) === 2) {
+                        $bytes = (int) $parts[0];
+                        $entryName = basename($parts[1]);
+                        $dirSizes[$entryName] = $bytes;
+                    }
+                }
+            }
+        }
 
         foreach (scandir($absolute) ?: [] as $entry) {
             if ($entry === '.') {
@@ -37,6 +53,8 @@ class FileManagerService
 
             if (! $isDir && $readable) {
                 $size = @filesize($full) ?: 0;
+            } elseif ($isDir && $entry !== '..') {
+                $size = $dirSizes[$entry] ?? 0;
             }
 
             $perms = '';
@@ -67,8 +85,8 @@ class FileManagerService
                 'name' => $entry,
                 'path' => $entryPath,
                 'type' => $isDir ? 'directory' : 'file',
-                'size' => $isDir ? 0 : $size,
-                'size_formatted' => $isDir ? '—' : $this->formatSize($size),
+                'size' => $size,
+                'size_formatted' => ($isDir && $entry === '..') ? '—' : $this->formatSize($size),
                 'permissions' => $perms,
                 'owner' => $owner,
                 'group' => $group,
