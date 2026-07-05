@@ -6,6 +6,16 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/common.sh"
 log "Intema Panel Bootstrap Installer"
 log "Log file: ${LOG_FILE}"
 
+if [[ "${INTEMA_ACTION:-}" == "upgrade" ]]; then
+    log "Upgrade mode: only running application deployment and verification steps"
+    run_step "Deploying application" "07-application.sh"
+    run_step "Verifying installation" "verify-install.sh"
+    
+    trap - ERR
+    log "Upgrade complete."
+    exit 0
+fi
+
 run_step "Updating Ubuntu" "01-apt-update.sh"
 run_step "Installing base packages" "02-base-packages.sh"
 run_step "Installing PHP and Composer" "03-php-composer.sh"
