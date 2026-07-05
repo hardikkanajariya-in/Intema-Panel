@@ -8,6 +8,7 @@ import {
 } from '@/components/navigation';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import type { PanelConfig } from '@/types/panel';
 
 interface SidebarProps {
     open: boolean;
@@ -15,7 +16,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open, onClose }: SidebarProps) {
-    const { panel } = usePage().props;
+    const { panel } = usePage().props as unknown as { panel: PanelConfig };
     const { url } = usePage();
 
     const activityNav = {
@@ -104,6 +105,26 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                         {renderNavItems(bottomNavigation)}
                     </div>
                 </nav>
+
+                <div className="border-t border-border p-4 text-center text-xs text-muted-foreground bg-sidebar">
+                    <p className="font-semibold">
+                        {panel.name} v{panel.version}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {panel.license} License
+                    </p>
+                    <p className="mt-1 text-[10px]">
+                        Built with ❤️ by{' '}
+                        <a
+                            href={panel.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-primary hover:underline"
+                        >
+                            {panel.company}
+                        </a>
+                    </p>
+                </div>
             </aside>
         </>
     );

@@ -4,7 +4,6 @@ import type {ReactNode} from 'react';
 
 import { FlashMessage } from '@/components/FlashMessage';
 import { Header } from '@/components/Header';
-import { PanelFooter } from '@/components/PanelFooter';
 import { Sidebar } from '@/components/Sidebar';
 import { useIsMobile } from '@/Hooks/useMobile';
 import { useTheme } from '@/Hooks/useTheme';
@@ -42,7 +41,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
                     }}
                 />
                 <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
-                <PanelFooter />
             </div>
 
             <FlashMessage />
