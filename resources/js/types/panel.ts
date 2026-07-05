@@ -17,6 +17,7 @@ export interface PanelSettings {
     timezone: string;
     theme: string;
     github_url: string;
+    github_token?: string;
     default_database_prefix: string;
     default_resource_status: string;
 }

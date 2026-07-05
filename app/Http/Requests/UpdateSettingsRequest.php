@@ -27,6 +27,7 @@ class UpdateSettingsRequest extends FormRequest
             'timezone' => ['required', 'string', 'timezone:all'],
             'theme' => ['required', Rule::in(['light', 'dark', 'system'])],
             'github_url' => ['required', 'url', 'max:255'],
+            'github_token' => ['nullable', 'string', 'max:255'],
             'default_database_prefix' => ['required', 'string', 'max:32', 'regex:/^[a-z][a-z0-9_]*$/'],
             'default_resource_status' => ['required', Rule::enum(ResourceStatus::class)],
         ];

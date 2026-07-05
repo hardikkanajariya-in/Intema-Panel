@@ -16,7 +16,9 @@ return [
 
     'website' => env('PANEL_WEBSITE', 'https://hardikkanajariya.in'),
 
-    'github' => env('PANEL_GITHUB', 'https://github.com/hardikkanajariya/intema-panel'),
+    'github' => env('PANEL_GITHUB', 'https://github.com/hardikkanajariya-in/intema-panel'),
+
+    'github_token' => env('PANEL_GITHUB_TOKEN'),
 
     'support_email' => env('PANEL_SUPPORT_EMAIL', 'hello@hardikkanajariya.in'),
 

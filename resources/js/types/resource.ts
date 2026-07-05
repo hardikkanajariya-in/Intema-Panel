@@ -26,6 +26,8 @@ export interface Application {
     deploy_path: string | null;
     runtime: string | null;
     linux_user: string | null;
+    webhook_url?: string;
+    webhook_secret?: string;
     notes: string | null;
     created_at: string | null;
 }

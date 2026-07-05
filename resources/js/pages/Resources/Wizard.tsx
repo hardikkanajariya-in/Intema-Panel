@@ -1,6 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState  } from 'react';
-import type {FormEvent} from 'react';
+import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -17,6 +17,14 @@ import type {
     Project,
 } from '@/types/resource';
 
+interface GithubRepo {
+    name: string;
+    clone_url: string;
+    ssh_url: string;
+    private: boolean;
+    default_branch: string;
+}
+
 interface WizardProps {
     step: number;
     selectedProject: Project | null;
@@ -25,6 +33,7 @@ interface WizardProps {
     applicationTypes: ApplicationTypeOption[];
     applications: Application[];
     domains: Domain[];
+    githubConnected: boolean;
 }
 
 const resourceTypes = [
@@ -42,10 +51,19 @@ export default function ResourceWizard({
     applicationTypes,
     applications,
     domains,
+    githubConnected,
 }: WizardProps) {
     const [currentStep, setCurrentStep] = useState(step);
     const [projectUuid, setProjectUuid] = useState(selectedProject?.uuid ?? '');
     const [type, setType] = useState(resourceType ?? '');
+
+    // GitHub Integration States
+    const [githubRepos, setGithubRepos] = useState<GithubRepo[]>([]);
+    const [githubBranches, setGithubBranches] = useState<string[]>([]);
+    const [loadingRepos, setLoadingRepos] = useState(false);
+    const [loadingBranches, setLoadingBranches] = useState(false);
+    const [isManualGit, setIsManualGit] = useState(!githubConnected);
+    const [selectedRepo, setSelectedRepo] = useState('');
 
     const { data, setData, post, processing, errors } = useForm({
         resource_type: type,
@@ -73,17 +91,60 @@ export default function ResourceWizard({
         notes: '',
     });
 
+    useEffect(() => {
+        if (githubConnected && type === 'application') {
+            setLoadingRepos(true);
+            fetch('/github/repositories')
+                .then((res) => res.json())
+                .then((resData) => {
+                    if (Array.isArray(resData)) {
+                        setGithubRepos(resData);
+                    }
+                })
+                .catch((err) => console.error(err))
+                .finally(() => setLoadingRepos(false));
+        }
+    }, [githubConnected, type]);
+
+    const handleRepoChange = (repoName: string) => {
+        setSelectedRepo(repoName);
+        const repo = githubRepos.find((r) => r.name === repoName);
+        if (!repo) return;
+
+        const nameOnly = repo.name.split('/')[1];
+
+        setData((prev) => ({
+            ...prev,
+            name: nameOnly,
+            repository_url: repo.clone_url,
+            repository_branch: repo.default_branch,
+            deploy_path: `/var/www/${nameOnly}`,
+        }));
+
+        setLoadingBranches(true);
+        setGithubBranches([]);
+        fetch(`/github/branches?repo=${encodeURIComponent(repoName)}`)
+            .then((res) => res.json())
+            .then((resData) => {
+                if (Array.isArray(resData)) {
+                    setGithubBranches(resData);
+                }
+            })
+            .catch((err) => console.error(err))
+            .finally(() => setLoadingBranches(false));
+    };
+
     const goToStep = (nextStep: number) => {
         const params = new URLSearchParams();
         params.set('step', String(nextStep));
 
         if (projectUuid) {
-params.set('project', projectUuid);
-}
+            params.set('project', projectUuid);
+        }
 
         if (type) {
-params.set('type', type);
-}
+            params.set('type', type);
+        }
 
         router.get(`/resources/create?${params.toString()}`);
         setCurrentStep(nextStep);
@@ -194,6 +255,68 @@ params.set('type', type);
                     <input type="hidden" name="resource_type" value={type} />
                     {type === 'application' && (
                         <>
+                            {githubConnected && (
+                                <div className="mb-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <Label className="font-semibold">GitHub Integration</Label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsManualGit(!isManualGit)}
+                                            className="text-xs text-primary hover:underline"
+                                        >
+                                            {isManualGit ? 'Import from GitHub' : 'Use manual Git URL'}
+                                        </button>
+                                    </div>
+                                    {!isManualGit && (
+                                        <div className="bg-card border border-border rounded-lg p-4 space-y-4 shadow-sm">
+                                            <div className="space-y-2">
+                                                <Label>Select Repository</Label>
+                                                {loadingRepos ? (
+                                                    <p className="text-xs text-muted-foreground animate-pulse">Loading repositories...</p>
+                                                ) : (
+                                                    <Select
+                                                        value={selectedRepo}
+                                                        onChange={(e) => handleRepoChange(e.target.value)}
+                                                    >
+                                                        <option value="">Select a repository...</option>
+                                                        {githubRepos.map((repo) => (
+                                                            <option key={repo.name} value={repo.name}>
+                                                                {repo.name} {repo.private ? '(Private)' : ''}
+                                                            </option>
+                                                        ))}
+                                                    </Select>
+                                                )}
+                                            </div>
+
+                                            {selectedRepo && (
+                                                <div className="space-y-2 animate-fadeIn">
+                                                    <Label>Repository Branch</Label>
+                                                    {loadingBranches ? (
+                                                        <p className="text-xs text-muted-foreground animate-pulse">Loading branches...</p>
+                                                    ) : (
+                                                        <Select
+                                                            value={data.repository_branch}
+                                                            onChange={(e) => setData('repository_branch', e.target.value)}
+                                                        >
+                                                            {githubBranches.map((branch) => (
+                                                                <option key={branch} value={branch}>
+                                                                    {branch}
+                                                                </option>
+                                                            ))}
+                                                            {githubBranches.length === 0 && (
+                                                                <option value={data.repository_branch}>
+                                                                    {data.repository_branch}
+                                                                </option>
+                                                            )}
+                                                        </Select>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             <div className="space-y-2">
                                 <Label>Name</Label>
                                 <Input
@@ -201,6 +324,7 @@ params.set('type', type);
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
+                                    placeholder="my-cool-app"
                                 />
                                 {errors.name && (
                                     <p className="text-sm text-destructive">
@@ -208,6 +332,7 @@ params.set('type', type);
                                     </p>
                                 )}
                             </div>
+
                             <div className="space-y-2">
                                 <Label>Framework</Label>
                                 <Select
@@ -223,18 +348,38 @@ params.set('type', type);
                                     ))}
                                 </Select>
                             </div>
-                            <div className="space-y-2">
-                                <Label>Repository URL</Label>
-                                <Input
-                                    value={data.repository_url}
-                                    onChange={(e) =>
-                                        setData(
-                                            'repository_url',
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
+
+                            {isManualGit && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label>Repository URL</Label>
+                                        <Input
+                                            value={data.repository_url}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'repository_url',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="https://github.com/user/repo.git"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Repository Branch</Label>
+                                        <Input
+                                            value={data.repository_branch}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'repository_branch',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="main"
+                                        />
+                                    </div>
+                                </>
+                            )}
+
                             <div className="space-y-2">
                                 <Label>Deploy Path</Label>
                                 <Input
@@ -242,6 +387,7 @@ params.set('type', type);
                                     onChange={(e) =>
                                         setData('deploy_path', e.target.value)
                                     }
+                                    placeholder="/var/www/my-cool-app"
                                 />
                             </div>
                             <div className="space-y-2">

@@ -52,6 +52,7 @@ use Illuminate\Support\Carbon;
     'runtime',
     'build_command',
     'start_command',
+    'webhook_secret',
     'environment_variables',
     'linux_user',
     'metadata',

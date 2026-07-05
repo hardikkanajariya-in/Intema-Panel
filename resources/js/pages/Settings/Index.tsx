@@ -131,6 +131,22 @@ export default function SettingsIndex({
                                 error={errors.github_url}
                             />
                         </Field>
+                        <Field
+                            label="GitHub Personal Access Token (for imports & webhooks)"
+                            id="github_token"
+                            error={errors.github_token}
+                        >
+                            <Input
+                                id="github_token"
+                                type="password"
+                                placeholder="ghp_..."
+                                value={data.github_token || ''}
+                                onChange={(e) =>
+                                    setData('github_token', e.target.value)
+                                }
+                                error={errors.github_token}
+                            />
+                        </Field>
                     </CardContent>
                 </Card>
 

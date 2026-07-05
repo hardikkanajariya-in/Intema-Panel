@@ -15,6 +15,7 @@ class CreateApplicationAction
     public function __construct(
         private readonly ProvisionerRegistry $provisionerRegistry,
         private readonly ActivityLogService $activityLogService,
+        private readonly \App\Services\SettingService $settingService,
     ) {}
 
     /**
@@ -35,6 +36,7 @@ class CreateApplicationAction
                 'runtime' => $data->runtime,
                 'build_command' => $data->buildCommand,
                 'start_command' => $data->startCommand,
+                'webhook_secret' => \Illuminate\Support\Str::random(40),
                 'environment_variables' => $data->environmentVariables,
                 'linux_user' => $data->linuxUser,
                 'metadata' => $data->metadata,
@@ -52,6 +54,12 @@ class CreateApplicationAction
 
         if (! $provision) {
             $application->update(['status' => ResourceStatus::Active]);
+
+            try {
+                $this->registerGitHubWebhook($application);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Failed to auto-register GitHub webhook: " . $e->getMessage());
+            }
 
             return $application;
         }
@@ -76,6 +84,12 @@ class CreateApplicationAction
                 description: "Application \"{$application->name}\" was provisioned.",
                 subject: $application->fresh(),
             );
+
+            try {
+                $this->registerGitHubWebhook($application);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Failed to auto-register GitHub webhook: " . $e->getMessage());
+            }
         } catch (Throwable $exception) {
             $this->activityLogService->log(
                 action: 'application.provisioned',
@@ -89,5 +103,39 @@ class CreateApplicationAction
         }
 
         return $application->fresh();
+    }
+
+    private function registerGitHubWebhook(Application $application): void
+    {
+        $token = $this->settingService->get('github_token');
+        if (! $token || ! $application->repository_url) {
+            return;
+        }
+
+        // Parse owner/repo from repository_url
+        if (! preg_match('/github\.com[:\/](.+?)(?:\.git)?$/i', $application->repository_url, $matches)) {
+            return;
+        }
+
+        $repo = trim($matches[1], '/');
+        $webhookUrl = url('/api/webhooks/github');
+
+        // Call GitHub API to create webhook
+        $response = \Illuminate\Support\Facades\Http::withToken($token)
+            ->post("https://api.github.com/repos/{$repo}/hooks", [
+                'name' => 'web',
+                'active' => true,
+                'events' => ['push'],
+                'config' => [
+                    'url' => $webhookUrl,
+                    'content_type' => 'json',
+                    'secret' => $application->webhook_secret,
+                    'insecure_ssl' => '1',
+                ],
+            ]);
+
+        if ($response->failed()) {
+            throw new \RuntimeException($response->json('message') ?? 'GitHub API error.');
+        }
     }
 }

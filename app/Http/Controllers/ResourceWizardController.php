@@ -33,6 +33,7 @@ class ResourceWizardController extends Controller
         private readonly CreateManagedDatabaseAction $createManagedDatabaseAction,
         private readonly CreateDomainAction $createDomainAction,
         private readonly CreateSslCertificateAction $createSslCertificateAction,
+        private readonly \App\Services\SettingService $settingService,
     ) {}
 
     public function create(Request $request): Response
@@ -57,6 +58,7 @@ class ResourceWizardController extends Controller
             'domains' => DomainResource::collection(
                 Domain::query()->orderBy('hostname')->get(),
             )->resolve(),
+            'githubConnected' => ! empty($this->settingService->get('github_token')),
         ]);
     }
 

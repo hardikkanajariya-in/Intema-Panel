@@ -147,6 +147,31 @@ return;
                 </Card>
                 <Card>
                     <CardHeader>
+                        <CardTitle>Git Auto-Deploy (GitHub Webhook)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 text-sm">
+                        <p className="text-muted-foreground text-xs leading-relaxed">
+                            To configure Vercel-like automatic deployment on every git push:
+                        </p>
+                        <div>
+                            <span className="font-semibold block text-xs text-muted-foreground uppercase mb-1">Payload URL</span>
+                            <div className="flex gap-2 items-center bg-muted p-2 rounded-lg font-mono text-xs overflow-x-auto select-all border border-border">
+                                {application.webhook_url}
+                            </div>
+                        </div>
+                        <div>
+                            <span className="font-semibold block text-xs text-muted-foreground uppercase mb-1">Secret Token</span>
+                            <div className="flex gap-2 items-center bg-muted p-2 rounded-lg font-mono text-xs select-all border border-border">
+                                {application.webhook_secret || '—'}
+                            </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground italic leading-relaxed">
+                            Go to your GitHub repository → Settings → Webhooks → Add Webhook. Paste the Payload URL, set Content Type to <code>application/json</code>, and enter the Secret Token.
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
                         <CardTitle>Runtime Operations</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-wrap gap-2">

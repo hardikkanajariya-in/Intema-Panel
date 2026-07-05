@@ -33,6 +33,8 @@ class ApplicationResource extends JsonResource
             'start_command' => $this->start_command,
             'linux_user' => $this->linux_user,
             'metadata' => $this->metadata,
+            'webhook_secret' => $this->webhook_secret,
+            'webhook_url' => url('/api/webhooks/github'),
             'notes' => $this->notes,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

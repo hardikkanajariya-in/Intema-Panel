@@ -7,6 +7,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\GithubWebhookController;
+use App\Http\Controllers\GithubController;
 use App\Http\Controllers\ManagedDatabaseController;
 use App\Http\Controllers\NginxController;
 use App\Http\Controllers\ProjectController;
@@ -16,6 +18,8 @@ use App\Http\Controllers\SetupController;
 use App\Http\Controllers\SslCertificateController;
 use App\Http\Controllers\SystemController;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/api/webhooks/github', [GithubWebhookController::class, 'handle'])->name('api.webhooks.github');
 
 Route::middleware('setup')->group(function () {
     Route::get('/setup', [SetupController::class, 'index'])->name('setup.index');
@@ -82,6 +86,9 @@ Route::middleware('setup')->group(function () {
         Route::post('/files/create-file', [FileManagerController::class, 'createFile'])->name('files.create-file');
         Route::delete('/files', [FileManagerController::class, 'delete'])->name('files.delete');
         Route::post('/files/rename', [FileManagerController::class, 'rename'])->name('files.rename');
+
+        Route::get('/github/repositories', [GithubController::class, 'repositories'])->name('github.repositories');
+        Route::get('/github/branches', [GithubController::class, 'branches'])->name('github.branches');
 
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

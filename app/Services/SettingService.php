@@ -20,6 +20,7 @@ class SettingService
         'timezone' => 'panel.timezone',
         'theme' => 'panel.theme',
         'github_url' => 'panel.github',
+        'github_token' => 'panel.github_token',
         'default_database_prefix' => 'panel.default_database_prefix',
         'default_resource_status' => 'panel.default_resource_status',
     ];

@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn () => app(SetupService::class)->isComplete() ? route('login') : route('setup.index'));
 
+        $middleware->validateCsrfTokens(except: [
+            '/api/webhooks/github',
+        ]);
+
         $middleware->alias([
             'setup' => EnsureSetupComplete::class,
         ]);
