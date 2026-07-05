@@ -509,6 +509,7 @@ main() {
     parse_args "$@"
     require_root
     detect_ubuntu
+    export INTEMA_ACTION="${INTEMA_ACTION:-install}"
 
     # Try to load existing PANEL_DOMAIN from .env if present
     if [[ -z "${PANEL_DOMAIN:-}" ]]; then

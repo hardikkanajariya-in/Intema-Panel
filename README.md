@@ -105,7 +105,7 @@ Project (organizational)
 - **SQLite** — panel metadata (`projects`, `applications`, `databases`, `domains`, `ssl_certificates`, `deployments`)
 - **Shell scripts** — native Linux provisioning (no Docker)
 
-See [docs/architecture.md](docs/architecture.md) for details.
+See [docs/architecture.md](docs/architecture.md) for details, and [docs/cloudflare-dns.md](docs/cloudflare-dns.md) for Cloudflare DNS integration instructions.
 
 ## License
 
