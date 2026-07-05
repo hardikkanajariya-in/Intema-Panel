@@ -11,12 +11,9 @@ export interface PanelConfig {
 
 export interface PanelSettings {
     panel_name: string;
-    company_name: string;
-    website: string;
     support_email: string;
     timezone: string;
     theme: string;
-    github_url: string;
     github_token?: string;
     default_database_prefix: string;
     default_resource_status: string;

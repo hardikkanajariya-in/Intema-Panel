@@ -13,13 +13,23 @@ export function PanelFooter() {
             <p className="mt-1">
                 Built with ❤️ by{' '}
                 <a
-                    href={panel.website}
+                    href="https://github.com/hardikkanajariya-in"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-primary transition-colors hover:text-primary/80"
+                    className="font-semibold text-primary hover:underline"
                 >
-                    {panel.company}
+                    Hardik Kanajariya
+                </a>{' '}
+                (
+                <a
+                    href="https://github.com/hardik-kanajariya"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-muted-foreground text-[10px]"
+                >
+                    @hardik-kanajariya
                 </a>
+                )
             </p>
         </footer>
     );

@@ -71,36 +71,6 @@ export default function SettingsIndex({
                             />
                         </Field>
                         <Field
-                            label="Company Name"
-                            id="company_name"
-                            required
-                            error={errors.company_name}
-                        >
-                            <Input
-                                id="company_name"
-                                value={data.company_name}
-                                onChange={(e) =>
-                                    setData('company_name', e.target.value)
-                                }
-                                error={errors.company_name}
-                            />
-                        </Field>
-                        <Field
-                            label="Website"
-                            id="website"
-                            required
-                            error={errors.website}
-                        >
-                            <Input
-                                id="website"
-                                value={data.website}
-                                onChange={(e) =>
-                                    setData('website', e.target.value)
-                                }
-                                error={errors.website}
-                            />
-                        </Field>
-                        <Field
                             label="Support Email"
                             id="support_email"
                             required
@@ -114,21 +84,6 @@ export default function SettingsIndex({
                                     setData('support_email', e.target.value)
                                 }
                                 error={errors.support_email}
-                            />
-                        </Field>
-                        <Field
-                            label="GitHub URL"
-                            id="github_url"
-                            required
-                            error={errors.github_url}
-                        >
-                            <Input
-                                id="github_url"
-                                value={data.github_url}
-                                onChange={(e) =>
-                                    setData('github_url', e.target.value)
-                                }
-                                error={errors.github_url}
                             />
                         </Field>
                         <Field

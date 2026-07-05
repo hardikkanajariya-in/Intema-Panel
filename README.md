@@ -74,7 +74,7 @@ intema uninstall  # Remove build artifacts
 Copy `.env.example` to `.env` and configure:
 
 - `PANEL_PG_*` — PostgreSQL admin credentials
-- `PANEL_NAME`, `PANEL_TAGLINE`, `PANEL_COMPANY`, `PANEL_WEBSITE` — branding (defaults in `config/panel.php`)
+- `PANEL_NAME`, `PANEL_TAGLINE` — branding (defaults in `config/panel.php`)
 - `ADMIN_EMAIL` / `ADMIN_PASSWORD` — administrator account
 
 ## Development
