@@ -54,14 +54,16 @@ build_development_application() {
 
     cd "${APP_DIR}"
 
-    composer install --no-dev --optimize-autoloader --no-interaction
+    composer install --no-dev --optimize-autoloader --no-interaction --no-cache
 
     if command -v pnpm >/dev/null 2>&1; then
         pnpm install --frozen-lockfile 2>/dev/null || pnpm install
         pnpm run build
+        pnpm store prune || true
     else
         npm ci 2>/dev/null || npm install
         npm run build
+        npm cache clean --force || true
     fi
 
     configure_application
