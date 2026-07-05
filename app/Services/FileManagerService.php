@@ -25,8 +25,8 @@ class FileManagerService
         $dirSizes = [];
 
         if (DIRECTORY_SEPARATOR === '/' && is_readable($absolute)) {
-            // Run du to get sizes of all child folders/files in one command
-            exec("cd " . escapeshellarg($absolute) . " && du -sb ./* 2>/dev/null", $output, $status);
+            // Run du to get sizes of all child folders/files (including hidden dotfiles) in one command
+            exec("cd " . escapeshellarg($absolute) . " && du -sb --max-depth=1 . 2>/dev/null", $output, $status);
             if ($status === 0) {
                 foreach ($output as $line) {
                     $parts = preg_split('/\s+/', $line, 2);
