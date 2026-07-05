@@ -134,6 +134,7 @@ class ShellService
             'PGHOST' => (string) config('panel.postgres.host'),
             'PGPORT' => (string) config('panel.postgres.port'),
             'PGUSER' => (string) config('panel.postgres.admin_user'),
+            'HOME' => '/tmp',
         ];
 
         $password = config('panel.postgres.admin_password');
