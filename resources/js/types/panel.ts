@@ -13,8 +13,8 @@ export interface PanelSettings {
     panel_name: string;
     support_email: string;
     timezone: string;
-    theme: string;
+    theme?: string;
     github_token?: string;
     default_database_prefix: string;
-    default_resource_status: string;
+    default_resource_status?: string;
 }

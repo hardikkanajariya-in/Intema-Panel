@@ -135,25 +135,6 @@ export default function SettingsIndex({
                             </Select>
                         </Field>
                         <Field
-                            label="Theme"
-                            id="theme"
-                            required
-                            error={errors.theme}
-                        >
-                            <Select
-                                id="theme"
-                                value={data.theme}
-                                onChange={(e) =>
-                                    setData('theme', e.target.value)
-                                }
-                                error={errors.theme}
-                            >
-                                <option value="system">System</option>
-                                <option value="light">Light</option>
-                                <option value="dark">Dark</option>
-                            </Select>
-                        </Field>
-                        <Field
                             label="Default Database Prefix"
                             id="default_database_prefix"
                             required
@@ -170,29 +151,6 @@ export default function SettingsIndex({
                                 }
                                 error={errors.default_database_prefix}
                             />
-                        </Field>
-                        <Field
-                            label="Default Resource Status"
-                            id="default_resource_status"
-                            required
-                            error={errors.default_resource_status}
-                        >
-                            <Select
-                                id="default_resource_status"
-                                value={data.default_resource_status}
-                                onChange={(e) =>
-                                    setData(
-                                        'default_resource_status',
-                                        e.target.value,
-                                    )
-                                }
-                                error={errors.default_resource_status}
-                            >
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                                <option value="pending">Pending</option>
-                                <option value="suspended">Suspended</option>
-                            </Select>
                         </Field>
                     </CardContent>
                 </Card>
