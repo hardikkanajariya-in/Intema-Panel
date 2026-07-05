@@ -56,7 +56,7 @@ export default function ResourceWizard({
         repository_url: '',
         repository_branch: 'main',
         deploy_path: '',
-        runtime: 'php8.3',
+        runtime: 'php8.4',
         linux_user: '',
         domain: '',
         document_root: '',

@@ -47,7 +47,7 @@ php -m | grep -qi pgsql && log "OK: PHP PostgreSQL extension" || { log "MISSING:
 
 check_service "Nginx" nginx
 check_service "PostgreSQL" postgresql
-check_service "PHP-FPM" php8.3-fpm
+check_service "PHP-FPM" php8.4-fpm
 
 APP_DIR="${PANEL_INSTALL_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 if [[ -f "${APP_DIR}/.env" && -f "${APP_DIR}/database/database.sqlite" ]]; then

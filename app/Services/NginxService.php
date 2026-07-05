@@ -30,7 +30,7 @@ class NginxService
 
     public function createVirtualHost(string $domain, string $root, ?string $phpSocket = null): ShellResult
     {
-        $phpSocket ??= 'unix:/run/php/php8.3-fpm.sock';
+        $phpSocket ??= 'unix:/run/php/php8.4-fpm.sock';
 
         return $this->shellService->run('nginx_create_vhost.sh', [
             Str::slug($domain, '_'),

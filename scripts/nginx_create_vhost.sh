@@ -6,7 +6,7 @@ DOMAIN_PATTERN='^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a
 SITE_NAME="${1:-}"
 DOMAIN="${2:-}"
 ROOT="${3:-}"
-PHP_SOCKET="${4:-unix:/run/php/php8.3-fpm.sock}"
+PHP_SOCKET="${4:-unix:/run/php/php8.4-fpm.sock}"
 
 SITES_AVAILABLE="${PANEL_NGINX_SITES_AVAILABLE:-/etc/nginx/sites-available}"
 

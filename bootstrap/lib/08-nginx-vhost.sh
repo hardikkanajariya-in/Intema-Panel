@@ -18,7 +18,7 @@ server {
 
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
     }
 }
 EOF
@@ -27,7 +27,7 @@ ln -sf /etc/nginx/sites-available/intema-panel /etc/nginx/sites-enabled/intema-p
 rm -f /etc/nginx/sites-enabled/default
 nginx -t
 systemctl reload nginx
-systemctl restart php8.3-fpm
+systemctl restart php8.4-fpm
 
 ufw allow OpenSSH
 ufw allow 'Nginx Full'

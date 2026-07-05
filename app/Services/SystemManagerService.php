@@ -22,7 +22,7 @@ class SystemManagerService
      * @var array<string, array{label: string, binary: string, service: string|null, script: string|null}>
      */
     private const COMPONENTS = [
-        'php' => ['label' => 'PHP', 'binary' => 'php', 'service' => 'php8.3-fpm', 'script' => '03-php-composer.sh'],
+        'php' => ['label' => 'PHP', 'binary' => 'php', 'service' => 'php8.4-fpm', 'script' => '03-php-composer.sh'],
         'composer' => ['label' => 'Composer', 'binary' => 'composer', 'service' => null, 'script' => '03-php-composer.sh'],
         'node' => ['label' => 'Node.js', 'binary' => 'node', 'service' => null, 'script' => '06-node-supervisor.sh'],
         'npm' => ['label' => 'NPM', 'binary' => 'npm', 'service' => null, 'script' => '06-node-supervisor.sh'],

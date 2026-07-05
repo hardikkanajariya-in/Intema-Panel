@@ -15,7 +15,7 @@ class SystemCommandService
     private const ALLOWED_SERVICES = [
         'nginx',
         'postgresql',
-        'php8.3-fpm',
+        'php8.4-fpm',
         'supervisor',
         'fail2ban',
         'ufw',

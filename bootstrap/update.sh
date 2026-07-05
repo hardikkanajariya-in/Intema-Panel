@@ -16,7 +16,7 @@ php artisan config:clear
 php artisan route:clear
 php artisan view:clear
 npm run build
-systemctl reload php8.3-fpm 2>/dev/null || true
+systemctl reload php8.4-fpm 2>/dev/null || true
 systemctl reload nginx 2>/dev/null || true
 
 trap - ERR

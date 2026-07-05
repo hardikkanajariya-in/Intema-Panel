@@ -24,7 +24,7 @@ fi
 php artisan config:cache 2>/dev/null || true
 php artisan route:cache 2>/dev/null || true
 php artisan view:cache 2>/dev/null || true
-systemctl restart php8.3-fpm 2>/dev/null || true
+systemctl restart php8.4-fpm 2>/dev/null || true
 systemctl restart nginx 2>/dev/null || true
 
 trap - ERR

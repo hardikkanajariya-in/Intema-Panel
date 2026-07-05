@@ -124,7 +124,7 @@ abstract class AbstractApplicationProvisioner implements ApplicationProvisionerI
             'environment_variables' => $input['environment_variables'] ?? $application->environment_variables,
             'domain' => $domain,
             'generate_ssl' => $input['generate_ssl'] ?? false,
-            'php_socket' => $input['php_socket'] ?? 'unix:/run/php/php8.3-fpm.sock',
+            'php_socket' => $input['php_socket'] ?? 'unix:/run/php/php8.4-fpm.sock',
             'metadata' => array_merge($application->metadata ?? [], [
                 'provisioned_at' => now()->toIso8601String(),
                 'type' => $this->type(),

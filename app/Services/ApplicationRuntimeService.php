@@ -173,7 +173,7 @@ class ApplicationRuntimeService
                 $application->update(['root_path' => $input['document_root'] ?? $application->root_path]);
             }),
             'update_php_version' => tap('PHP version updated.', function () use ($application, $input): void {
-                $application->update(['runtime' => $input['php_version'] ?? $application->runtime ?? 'php8.3']);
+                $application->update(['runtime' => $input['php_version'] ?? $application->runtime ?? 'php8.4']);
             }),
             'update_environment' => tap('Environment updated.', function () use ($application, $input): void {
                 if (isset($input['environment_variables']) && is_array($input['environment_variables'])) {
