@@ -7,9 +7,10 @@ log "Repairing Intema Panel"
 APP_DIR="${PANEL_INSTALL_PATH:-$(dirname "${BASH_SOURCE[0]}")/..}"
 cd "${APP_DIR}"
 
+mkdir -p "${APP_DIR}/apps" /var/www 2>/dev/null || true
 chmod +x scripts/*.sh bootstrap/*.sh bin/intema 2>/dev/null || true
-chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
-chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+chown -R www-data:www-data storage bootstrap/cache database apps /var/www 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache apps /var/www 2>/dev/null || true
 php artisan migrate --force
 php artisan config:clear
 php artisan route:clear

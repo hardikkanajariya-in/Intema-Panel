@@ -295,6 +295,14 @@ class FileManagerService
 
     private function deleteDirectory(string $dir): void
     {
+        if (DIRECTORY_SEPARATOR === '/') {
+            exec("rm -rf " . escapeshellarg($dir) . " 2>&1", $output, $status);
+            if ($status !== 0) {
+                throw new \RuntimeException("Failed to remove directory: " . implode("\n", $output));
+            }
+            return;
+        }
+
         $items = scandir($dir);
 
         if ($items === false) {

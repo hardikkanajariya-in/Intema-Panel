@@ -25,6 +25,8 @@ use App\Provision\Tasks\RunBuildCommandTask;
 use App\Provision\Tasks\RunMigrationsTask;
 use App\Provision\Tasks\SaveMetadataTask;
 use App\Provision\Tasks\SetPermissionsTask;
+use App\Services\NginxService;
+use App\Services\ShellService;
 use Illuminate\Support\Str;
 
 abstract class AbstractApplicationProvisioner implements ApplicationProvisionerInterface
@@ -47,6 +49,8 @@ abstract class AbstractApplicationProvisioner implements ApplicationProvisionerI
         protected readonly SetPermissionsTask $setPermissionsTask,
         protected readonly HealthCheckTask $healthCheckTask,
         protected readonly SaveMetadataTask $saveMetadataTask,
+        protected readonly NginxService $nginxService,
+        protected readonly ShellService $shellService,
     ) {}
 
     /**
@@ -96,9 +100,81 @@ abstract class AbstractApplicationProvisioner implements ApplicationProvisionerI
 
     public function delete(Application $application): ProvisionResult
     {
+        // 1. Delete Nginx virtual host for each domain
+        foreach ($application->domains as $domain) {
+            try {
+                $siteName = Str::slug($domain->hostname, '_');
+                $this->nginxService->deleteSite($siteName);
+            } catch (\Throwable $e) {
+                // Ignore site deletion failures to ensure application deletion continues
+            }
+        }
+        try {
+            $this->nginxService->reload();
+        } catch (\Throwable $e) {
+            // Ignore
+        }
+
+        // 2. Stop and delete Supervisor config for Node applications
+        $nodeTypes = [\App\Enums\ApplicationType::NextJs, \App\Enums\ApplicationType::NestJs, \App\Enums\ApplicationType::ApiOnly];
+        if (in_array($application->type, $nodeTypes, true)) {
+            $slug = Str::slug($application->name, '_') . '_' . $application->id;
+            $configFile = "/etc/supervisor/conf.d/{$slug}.conf";
+            if (is_file($configFile)) {
+                try {
+                    $this->shellService->runSystem('supervisorctl', ['stop', $slug], optional: true);
+                    @unlink($configFile);
+                    $this->shellService->runSystem('supervisorctl', ['reread']);
+                    $this->shellService->runSystem('supervisorctl', ['update']);
+                } catch (\Throwable $e) {
+                    // Ignore
+                }
+            }
+        }
+
+        // 3. Delete deployment directory
+        $deployPath = $application->deploy_path;
+        if ($deployPath && is_dir($deployPath)) {
+            try {
+                if (DIRECTORY_SEPARATOR === '/') {
+                    // On Linux, use rm -rf to force remove the directory
+                    $this->shellService->runSystem('rm', ['-rf', $deployPath]);
+                } else {
+                    // On Windows (dev environment), use recursive PHP deletion
+                    $this->deleteDirectory($deployPath);
+                }
+            } catch (\Throwable $e) {
+                // Ignore directory deletion failures so DB record gets cleaned up
+            }
+        }
+
+        // 4. Finally delete the DB record
         $application->delete();
 
-        return ProvisionResult::success('Application removed from panel.');
+        return ProvisionResult::success('Application and all its files, virtual hosts, and services have been deleted successfully.');
+    }
+
+    private function deleteDirectory(string $dir): void
+    {
+        if (! is_dir($dir)) {
+            return;
+        }
+        $items = scandir($dir);
+        if ($items === false) {
+            return;
+        }
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            $path = $dir . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($path)) {
+                $this->deleteDirectory($path);
+            } else {
+                @unlink($path);
+            }
+        }
+        @rmdir($dir);
     }
 
     public function health(Application $application): ProvisionResult

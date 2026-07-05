@@ -55,9 +55,10 @@ configure_application() {
     php artisan route:cache
     php artisan view:cache
 
+    mkdir -p "${APP_DIR}/apps"
     chmod +x scripts/*.sh bootstrap/*.sh bin/intema 2>/dev/null || true
-    chown -R www-data:www-data storage bootstrap/cache database
-    chmod -R 775 storage bootstrap/cache
+    chown -R www-data:www-data storage bootstrap/cache database apps
+    chmod -R 775 storage bootstrap/cache apps
 }
 
 build_development_application() {
