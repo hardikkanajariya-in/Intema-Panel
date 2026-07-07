@@ -37,6 +37,7 @@ export interface ManagedDatabase {
     name: string;
     database_name: string;
     database_user: string;
+    database_password?: string;
     host: string;
     port: number;
     status: string;

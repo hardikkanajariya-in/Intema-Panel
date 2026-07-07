@@ -57,7 +57,11 @@ Route::middleware('setup')->group(function () {
         Route::delete('/applications/{application}/domains/{domain}', [ApplicationController::class, 'detachDomain'])->name('applications.detach-domain');
 
         Route::resource('databases', ManagedDatabaseController::class)->only(['index', 'show', 'destroy']);
-        Route::post('/databases/{database}/backup', [ManagedDatabaseController::class, 'backup'])->name('databases.backup');
+        Route::get('/databases/{database}/backup', [ManagedDatabaseController::class, 'backup'])->name('databases.backup');
+        Route::get('/databases/{database}/backups/{backup}/download', [ManagedDatabaseController::class, 'downloadBackup'])->name('databases.backups.download');
+        Route::get('/databases/{database}/restore', [ManagedDatabaseController::class, 'showRestore'])->name('databases.restore.show');
+        Route::post('/databases/{database}/restore', [ManagedDatabaseController::class, 'restore'])->name('databases.restore');
+        Route::post('/databases/{database}/backups/{backup}/restore', [ManagedDatabaseController::class, 'restoreFromLog'])->name('databases.backups.restore');
         Route::post('/databases/{database}/reset-password', [ManagedDatabaseController::class, 'resetPassword'])->name('databases.reset-password');
 
         Route::resource('domains', DomainController::class)->only(['index', 'show', 'destroy']);

@@ -24,7 +24,9 @@ validate_identifier() {
 }
 
 DATABASE_NAME="${1:-}"
+DATABASE_USER="${2:-}"
 validate_identifier "${DATABASE_NAME}" "database name"
+validate_identifier "${DATABASE_USER}" "database user"
 
 if [[ -z "${PGHOST:-}" || -z "${PGPORT:-}" || -z "${PGUSER:-}" ]]; then
     log_error "PostgreSQL connection environment variables are required (PGHOST, PGPORT, PGUSER)"
@@ -40,7 +42,7 @@ if psql -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d postgres -tAc \
 fi
 
 psql -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d postgres -v ON_ERROR_STOP=1 \
-    -c "CREATE DATABASE \"${DATABASE_NAME}\""
+    -c "CREATE DATABASE \"${DATABASE_NAME}\" OWNER \"${DATABASE_USER}\""
 
-echo "Database created: ${DATABASE_NAME}"
+echo "Database created: ${DATABASE_NAME} (Owner: ${DATABASE_USER})"
 exit 0

@@ -40,7 +40,10 @@ if ! psql -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d postgres -tAc \
 fi
 
 psql -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d postgres -v ON_ERROR_STOP=1 \
-    -c "DROP OWNED BY \"${USERNAME}\""
+    -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE usename = '${USERNAME}' AND pid <> pg_backend_pid()"
+
+psql -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d postgres -v ON_ERROR_STOP=1 \
+    -c "DROP OWNED BY \"${USERNAME}\" CASCADE"
 
 psql -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d postgres -v ON_ERROR_STOP=1 \
     -c "DROP USER \"${USERNAME}\""

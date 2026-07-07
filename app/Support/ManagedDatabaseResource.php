@@ -20,6 +20,7 @@ class ManagedDatabaseResource extends JsonResource
             'name' => $this->name,
             'database_name' => $this->database_name,
             'database_user' => $this->database_user,
+            'database_password' => $this->database_password_encrypted,
             'host' => $this->host,
             'port' => $this->port,
             'status' => $this->status->value,

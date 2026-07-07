@@ -17,8 +17,8 @@ class PostgresService
     {
         $password ??= $this->encryptionService->generatePassword();
 
-        $this->shellService->run('create_database.sh', [$databaseName]);
         $this->shellService->run('create_user.sh', [$databaseUser, $password]);
+        $this->shellService->run('create_database.sh', [$databaseName, $databaseUser]);
         $this->shellService->run('grant_privileges.sh', [$databaseName, $databaseUser]);
 
         return new PostgresCredentials($databaseName, $databaseUser, $password);
