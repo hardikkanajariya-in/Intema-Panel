@@ -22,12 +22,12 @@ class ShellService
             throw new InvalidArgumentException('Invalid script name.');
         }
 
-        $scriptPath = rtrim((string) config('panel.scripts_path'), DIRECTORY_SEPARATOR)
+        $scriptPath = rtrim((string) config('panel.scripts_path'), '/\\')
             .DIRECTORY_SEPARATOR
             .$script;
 
         if (! is_file($scriptPath)) {
-            throw new ShellExecutionException("Script not found: {$script}");
+            throw new ShellExecutionException("Script not found: {$script} (resolved path: {$scriptPath})");
         }
 
         foreach ($arguments as $argument) {
