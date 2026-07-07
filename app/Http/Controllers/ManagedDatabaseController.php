@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Application;
 use App\Models\DatabaseBackup;
 use App\Models\ManagedDatabase;
+use App\Models\Project;
 use App\Services\ActivityLogService;
 use App\Services\DatabaseManagerService;
 use App\Services\PostgresService;
+use App\Support\ApplicationResource;
 use App\Support\ManagedDatabaseResource;
+use App\Support\ProjectResource;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -174,5 +178,68 @@ class ManagedDatabaseController extends Controller
         return redirect()
             ->route('databases.index')
             ->with('success', 'Database deleted successfully.');
+    }
+
+    public function create(Request $request): Response
+    {
+        $this->authorize('create', ManagedDatabase::class);
+
+        $projectUuid = $request->query('project');
+        $project = $projectUuid
+            ? Project::query()->where('uuid', $projectUuid)->first()
+            : null;
+
+        $applicationUuid = $request->query('application');
+        $application = $applicationUuid
+            ? Application::query()->where('uuid', $applicationUuid)->first()
+            : null;
+
+        return Inertia::render('Databases/Create', [
+            'selectedProject' => $project ? ProjectResource::make($project) : null,
+            'selectedApplication' => $application ? ApplicationResource::make($application) : null,
+            'projects' => ProjectResource::collection(Project::query()->orderBy('name')->get())->resolve(),
+            'applications' => ApplicationResource::collection(
+                Application::query()->orderBy('name')->get(),
+            )->resolve(),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $this->authorize('create', ManagedDatabase::class);
+
+        $validated = $request->validate([
+            'project_uuid' => ['required', 'string', 'exists:projects,uuid'],
+            'name' => ['required', 'string', 'max:255'],
+            'application_id' => ['nullable', 'exists:applications,uuid'],
+            'database_name' => ['nullable', 'string', 'max:63', 'regex:/^[a-z][a-z0-9_]*$/'],
+            'database_user' => ['nullable', 'string', 'max:63', 'regex:/^[a-z][a-z0-9_]*$/'],
+            'notes' => ['nullable', 'string'],
+            'provision' => ['boolean'],
+        ]);
+
+        $projectId = Project::query()->where('uuid', $validated['project_uuid'])->value('id');
+        $validated['project_id'] = $projectId;
+
+        // Resolve application ID
+        $applicationId = null;
+        if (! empty($validated['application_id'])) {
+            $applicationId = Application::query()->where('uuid', $validated['application_id'])->value('id');
+        }
+        $validated['application_id'] = $applicationId;
+        $provision = (bool) ($validated['provision'] ?? true);
+
+        try {
+            $database = app(\App\Actions\CreateManagedDatabaseAction::class)->execute(
+                \App\DTOs\ManagedDatabaseData::fromArray($validated),
+                provision: $provision,
+            );
+        } catch (\Throwable $exception) {
+            return back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()
+            ->route('databases.show', $database)
+            ->with('success', 'Database created successfully.');
     }
 }

@@ -43,27 +43,9 @@ export const mainNavigation: NavItem[] = [
         icon: Server,
         routeName: 'domains.index',
     },
-    {
-        title: 'SSL',
-        href: '/ssl-certificates',
-        icon: Shield,
-        routeName: 'ssl-certificates.index',
-    },
 ];
 
 export const secondaryNavigation: NavItem[] = [
-    {
-        title: 'Create Resource',
-        href: '/resources/create',
-        icon: Plus,
-        routeName: 'resources.create',
-    },
-    {
-        title: 'Nginx',
-        href: '/nginx',
-        icon: Server,
-        routeName: 'nginx.index',
-    },
     {
         title: 'System',
         href: '/system',

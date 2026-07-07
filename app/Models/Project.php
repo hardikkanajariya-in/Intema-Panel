@@ -78,14 +78,6 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<SslCertificate, $this>
-     */
-    public function sslCertificates(): HasMany
-    {
-        return $this->hasMany(SslCertificate::class);
-    }
-
-    /**
      * @return MorphMany<ActivityLog, $this>
      */
     public function activityLogs(): MorphMany

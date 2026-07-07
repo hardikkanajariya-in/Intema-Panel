@@ -95,4 +95,46 @@ class CloudflareService
 
         throw new \RuntimeException("Failed to delete DNS record on Cloudflare: " . json_encode($response->json()['errors'] ?? $response->body()));
     }
+
+    public function getZones(): array
+    {
+        $token = $this->settingService->get('cloudflare_token');
+        if (! $token) {
+            return [];
+        }
+
+        $response = Http::withToken($token)
+            ->get("https://api.cloudflare.com/client/v4/zones", [
+                'per_page' => 50,
+            ]);
+
+        if ($response->successful()) {
+            return $response->json()['result'] ?? [];
+        }
+
+        throw new \RuntimeException("Failed to fetch zones from Cloudflare: " . $response->body());
+    }
+
+    public function updateDnsRecord(string $zoneId, string $recordId, array $data): array
+    {
+        $token = $this->settingService->get('cloudflare_token');
+        if (! $token) {
+            throw new \RuntimeException("Cloudflare API token not configured.");
+        }
+
+        $response = Http::withToken($token)
+            ->put("https://api.cloudflare.com/client/v4/zones/{$zoneId}/dns_records/{$recordId}", [
+                'type' => $data['type'],
+                'name' => $data['name'],
+                'content' => $data['content'],
+                'ttl' => (int) ($data['ttl'] ?? 1),
+                'proxied' => (bool) ($data['proxied'] ?? false),
+            ]);
+
+        if ($response->successful()) {
+            return $response->json()['result'] ?? [];
+        }
+
+        throw new \RuntimeException("Failed to update DNS record on Cloudflare: " . json_encode($response->json()['errors'] ?? $response->body()));
+    }
 }

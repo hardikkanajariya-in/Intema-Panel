@@ -33,7 +33,7 @@ export default function DatabasesIndex({ databases }: DatabasesIndexProps) {
                     { title: 'Databases' },
                 ]}
                 actions={
-                    <Button href="/resources/create">Create Resource</Button>
+                    <Button href="/databases/create">Create Database</Button>
                 }
             />
             {databases.data.length === 0 ? (
@@ -42,8 +42,8 @@ export default function DatabasesIndex({ databases }: DatabasesIndexProps) {
                     description="Create a database resource to get started."
                     icon={<Database size={40} />}
                     action={
-                        <Button href="/resources/create">
-                            Create Resource
+                        <Button href="/databases/create">
+                            Create Database
                         </Button>
                     }
                 />

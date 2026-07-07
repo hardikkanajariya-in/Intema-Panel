@@ -76,7 +76,7 @@ class ProjectController extends Controller
     {
         $this->authorize('view', $project);
 
-        $project->loadCount(['applications', 'databases', 'domains', 'sslCertificates']);
+        $project->loadCount(['applications', 'databases', 'domains']);
         $project->load(['applications', 'databases', 'domains']);
 
         return Inertia::render('Projects/Show', [

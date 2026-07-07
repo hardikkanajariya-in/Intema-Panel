@@ -9,7 +9,6 @@ use App\Models\Deployment;
 use App\Models\Domain;
 use App\Models\ManagedDatabase;
 use App\Models\Project;
-use App\Models\SslCertificate;
 use App\Support\ActivityLogResource;
 use App\Support\DeploymentResource;
 use Carbon\Carbon;
@@ -43,7 +42,7 @@ class DashboardService
             applications: Application::query()->count(),
             databases: ManagedDatabase::query()->count(),
             domains: Domain::query()->count(),
-            sslCertificates: SslCertificate::query()->count(),
+            sslCertificates: Domain::query()->where('ssl_active', true)->count(),
             expiringCertificates: $expiringCerts,
             deployments: Deployment::query()->count(),
             loadAverage: $this->monitoringService->loadAverage(),

@@ -38,9 +38,9 @@ export default function ProjectsShow({
                 actions={
                     <div className="flex gap-2">
                         <Button
-                            href={`/resources/create?project=${project.uuid}`}
+                            href={`/applications/create?project=${project.uuid}`}
                         >
-                            Add Resource
+                            Add Application
                         </Button>
                         <Button
                             variant="outline"
@@ -56,10 +56,18 @@ export default function ProjectsShow({
             </div>
             <div className="grid gap-6 lg:grid-cols-3">
                 <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle>
                             Applications ({applications.length})
                         </CardTitle>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            href={`/applications/create?project=${project.uuid}`}
+                            className="h-8 px-2"
+                        >
+                            Add
+                        </Button>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         {applications.map((a) => (
@@ -80,8 +88,16 @@ export default function ProjectsShow({
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle>Databases ({databases.length})</CardTitle>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            href={`/databases/create?project=${project.uuid}`}
+                            className="h-8 px-2"
+                        >
+                            Add
+                        </Button>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         {databases.map((d) => (
@@ -102,8 +118,16 @@ export default function ProjectsShow({
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle>Domains ({domains.length})</CardTitle>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            href={`/domains/create?project=${project.uuid}`}
+                            className="h-8 px-2"
+                        >
+                            Add
+                        </Button>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         {domains.map((d) => (

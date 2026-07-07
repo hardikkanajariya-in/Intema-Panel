@@ -24,7 +24,7 @@ class DomainResource extends JsonResource
             'status_label' => $this->status->label(),
             'project_id' => $this->project_id,
             'application_id' => $this->application_id,
-            'ssl_certificate_id' => $this->ssl_certificate_id,
+            'ssl_active' => $this->ssl_active,
             'project' => $this->whenLoaded('project', fn () => ProjectResource::make($this->project)),
             'application' => $this->whenLoaded('application', fn () => ApplicationResource::make($this->application)),
             'notes' => $this->notes,

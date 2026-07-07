@@ -35,7 +35,7 @@ export default function ApplicationsIndex({
                     { title: 'Applications' },
                 ]}
                 actions={
-                    <Button href="/resources/create">Create Resource</Button>
+                    <Button href="/applications/create">Create Application</Button>
                 }
             />
             {applications.data.length === 0 ? (
@@ -44,8 +44,8 @@ export default function ApplicationsIndex({
                     description="Create an application resource to get started."
                     icon={<AppWindow size={40} />}
                     action={
-                        <Button href="/resources/create">
-                            Create Resource
+                        <Button href="/applications/create">
+                            Create Application
                         </Button>
                     }
                 />

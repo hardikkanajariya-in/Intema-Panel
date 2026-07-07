@@ -18,25 +18,22 @@ import {
     TableRow,
 } from '@/components/ui/Table';
 import AppLayout from '@/layouts/AppLayout';
-import type { Domain, SslCertificate } from '@/types/resource';
+import type { Domain } from '@/types/resource';
 
 interface DomainsShowProps {
     domain: Domain;
-    sslCertificate: SslCertificate | null;
-    availableCertificates: SslCertificate[];
     cloudflareConfigured: boolean;
 }
 
 export default function DomainsShow({
     domain,
-    sslCertificate,
-    availableCertificates,
     cloudflareConfigured,
 }: DomainsShowProps) {
     const [records, setRecords] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [addingRecord, setAddingRecord] = useState(false);
+    const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
 
     // Form state
     const [type, setType] = useState('A');
@@ -68,20 +65,20 @@ export default function DomainsShow({
         fetchRecords();
     }, [domain.uuid]);
 
-    const attachSsl = (uuid: string) => {
-        if (!uuid) return;
-        router.post(`/domains/${domain.uuid}/attach-ssl`, {
-            ssl_certificate_uuid: uuid,
-        });
-    };
+
 
     const handleAddRecord = async (e: FormEvent) => {
         e.preventDefault();
         setError(null);
         try {
             const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
-            const response = await fetch(`/domains/${domain.uuid}/dns-records`, {
-                method: 'POST',
+            const method = editingRecordId ? 'PUT' : 'POST';
+            const url = editingRecordId 
+                ? `/domains/${domain.uuid}/dns-records/${editingRecordId}`
+                : `/domains/${domain.uuid}/dns-records`;
+
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
@@ -91,6 +88,7 @@ export default function DomainsShow({
             const result = await response.json();
             if (result.success) {
                 setAddingRecord(false);
+                setEditingRecordId(null);
                 setName('');
                 setContent('');
                 setType('A');
@@ -98,11 +96,34 @@ export default function DomainsShow({
                 setProxied(true);
                 fetchRecords();
             } else {
-                setError(result.message || 'Failed to create DNS record.');
+                setError(result.message || `Failed to ${editingRecordId ? 'update' : 'create'} DNS record.`);
             }
         } catch (e: any) {
             setError(e.message || 'An error occurred.');
         }
+    };
+
+    const handleStartEdit = (record: any) => {
+        setEditingRecordId(record.id);
+        setType(record.type);
+        setName(record.name);
+        setContent(record.content);
+        setTtl(record.ttl);
+        setProxied(record.proxied);
+        setAddingRecord(true);
+        setTimeout(() => {
+            document.getElementById('dns-record-form')?.scrollIntoView({ behavior: 'smooth' });
+        }, 50);
+    };
+
+    const handleCancelEdit = () => {
+        setAddingRecord(false);
+        setEditingRecordId(null);
+        setName('');
+        setContent('');
+        setType('A');
+        setTtl(1);
+        setProxied(true);
     };
 
     const handleDeleteRecord = async (recordId: string) => {
@@ -173,49 +194,33 @@ export default function DomainsShow({
                             <CardTitle>SSL Certificate</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm">
-                            {sslCertificate ? (
+                            {domain.ssl_active ? (
                                 <>
-                                    <div>
-                                        {sslCertificate.domain_name} —{' '}
-                                        {sslCertificate.status_label}
+                                    <div className="text-green-600 dark:text-green-400 font-semibold flex items-center gap-1.5">
+                                        <span>✓</span> Active (configured via Let's Encrypt / Certbot)
                                     </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Traffic to this domain is secured with a valid SSL certificate.
+                                    </p>
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() =>
-                                            router.delete(
-                                                `/domains/${domain.uuid}/detach-ssl`,
-                                            )
-                                        }
+                                        onClick={() => router.post(`/domains/${domain.uuid}/configure-ssl`)}
                                     >
-                                        Detach SSL
+                                        Reconfigure / Renew SSL
                                     </Button>
                                 </>
                             ) : (
                                 <>
                                     <p className="text-muted-foreground">
-                                        No SSL certificate attached.
+                                        No SSL certificate configured.
                                     </p>
-                                    {availableCertificates.length > 0 && (
-                                        <Select
-                                            defaultValue=""
-                                            onChange={(e) =>
-                                                attachSsl(e.target.value)
-                                            }
-                                        >
-                                            <option value="">
-                                                Attach certificate...
-                                            </option>
-                                            {availableCertificates.map((cert) => (
-                                                <option
-                                                    key={cert.uuid}
-                                                    value={cert.uuid}
-                                                >
-                                                    {cert.domain_name}
-                                                </option>
-                                            ))}
-                                        </Select>
-                                    )}
+                                    <Button
+                                        size="sm"
+                                        onClick={() => router.post(`/domains/${domain.uuid}/configure-ssl`)}
+                                    >
+                                        Configure SSL
+                                    </Button>
                                 </>
                             )}
                         </CardContent>
@@ -233,7 +238,13 @@ export default function DomainsShow({
                         {cloudflareConfigured && (
                             <Button
                                 size="sm"
-                                onClick={() => setAddingRecord(!addingRecord)}
+                                onClick={() => {
+                                    if (addingRecord) {
+                                        handleCancelEdit();
+                                    } else {
+                                        setAddingRecord(true);
+                                    }
+                                }}
                             >
                                 {addingRecord ? 'Cancel' : 'Add Record'}
                             </Button>
@@ -256,8 +267,10 @@ export default function DomainsShow({
                                 </p>
                             </div>
                         ) : addingRecord ? (
-                            <form onSubmit={handleAddRecord} className="space-y-4 rounded-lg border border-border p-4 bg-muted/40 max-w-xl">
-                                <h4 className="text-sm font-semibold">New DNS Record</h4>
+                            <form id="dns-record-form" onSubmit={handleAddRecord} className="space-y-4 rounded-lg border border-border p-4 bg-muted/40 max-w-xl">
+                                <h4 className="text-sm font-semibold">
+                                    {editingRecordId ? 'Edit DNS Record' : 'New DNS Record'}
+                                </h4>
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <div>
                                         <Label htmlFor="dns_type">Type</Label>
@@ -327,8 +340,10 @@ export default function DomainsShow({
                                     )}
                                 </div>
                                 <div className="flex gap-2">
-                                    <Button type="submit" size="sm">Save Record</Button>
-                                    <Button type="button" variant="ghost" size="sm" onClick={() => setAddingRecord(false)}>Cancel</Button>
+                                    <Button type="submit" size="sm">
+                                        {editingRecordId ? 'Update Record' : 'Save Record'}
+                                    </Button>
+                                    <Button type="button" variant="ghost" size="sm" onClick={handleCancelEdit}>Cancel</Button>
                                 </div>
                             </form>
                         ) : loading ? (
@@ -370,7 +385,14 @@ export default function DomainsShow({
                                                         <Badge variant="secondary">DNS Only</Badge>
                                                     )}
                                                 </TableCell>
-                                                <TableCell className="text-right">
+                                                <TableCell className="text-right space-x-1">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleStartEdit(record)}
+                                                    >
+                                                        Edit
+                                                    </Button>
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"

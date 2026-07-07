@@ -63,7 +63,7 @@ export default function DashboardIndex({ stats }: DashboardPageProps) {
                 description="Infrastructure overview and server health"
                 breadcrumbs={[{ title: 'Dashboard' }]}
                 actions={
-                    <Button href="/resources/create">Create Resource</Button>
+                    <Button href="/projects/create">Create Project</Button>
                 }
             />
 

@@ -53,6 +53,7 @@ export interface Domain {
     hostname: string;
     nginx_site: string | null;
     document_root: string | null;
+    ssl_active: boolean;
     status: string;
     status_label: string;
     project_id: number | null;

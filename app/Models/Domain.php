@@ -36,7 +36,7 @@ use Illuminate\Support\Carbon;
     'hostname',
     'nginx_site',
     'document_root',
-    'ssl_certificate_id',
+    'ssl_active',
     'status',
     'notes',
     'created_by',
@@ -54,6 +54,7 @@ class Domain extends Model
     {
         return [
             'status' => ResourceStatus::class,
+            'ssl_active' => 'boolean',
         ];
     }
 
@@ -71,14 +72,6 @@ class Domain extends Model
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
-    }
-
-    /**
-     * @return BelongsTo<SslCertificate, $this>
-     */
-    public function sslCertificate(): BelongsTo
-    {
-        return $this->belongsTo(SslCertificate::class);
     }
 
     /**

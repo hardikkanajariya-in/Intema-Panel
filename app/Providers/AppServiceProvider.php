@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use App\Models\Domain;
 use App\Models\ManagedDatabase;
-use App\Models\SslCertificate;
 use App\Provision\ApplicationProvisioners\ApiProvisioner;
 use App\Provision\ApplicationProvisioners\CustomProvisioner;
 use App\Provision\ApplicationProvisioners\LaravelProvisioner;
@@ -44,7 +43,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Route::bind('database', fn (string $value) => ManagedDatabase::query()->where('uuid', $value)->firstOrFail());
         Route::bind('domain', fn (string $value) => Domain::query()->where('uuid', $value)->firstOrFail());
-        Route::bind('ssl_certificate', fn (string $value) => SslCertificate::query()->where('uuid', $value)->firstOrFail());
 
         $this->configureDefaults();
         $this->configureRateLimiting();

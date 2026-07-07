@@ -33,7 +33,7 @@ export default function DomainsIndex({ domains }: DomainsIndexProps) {
                     { title: 'Domains' },
                 ]}
                 actions={
-                    <Button href="/resources/create">Create Resource</Button>
+                    <Button href="/domains/create">Create Domain</Button>
                 }
             />
             {domains.data.length === 0 ? (
@@ -42,8 +42,8 @@ export default function DomainsIndex({ domains }: DomainsIndexProps) {
                     description="Create a domain resource to get started."
                     icon={<Globe size={40} />}
                     action={
-                        <Button href="/resources/create">
-                            Create Resource
+                        <Button href="/domains/create">
+                            Create Domain
                         </Button>
                     }
                 />
@@ -54,6 +54,7 @@ export default function DomainsIndex({ domains }: DomainsIndexProps) {
                             <TableRow>
                                 <TableHead>Hostname</TableHead>
                                 <TableHead>Document Root</TableHead>
+                                 <TableHead>SSL</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">
                                     Actions
@@ -68,6 +69,13 @@ export default function DomainsIndex({ domains }: DomainsIndexProps) {
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {domain.document_root ?? '—'}
+                                    </TableCell>
+                                    <TableCell>
+                                        {domain.ssl_active ? (
+                                            <Badge variant="success">Active</Badge>
+                                        ) : (
+                                            <Badge variant="secondary">None</Badge>
+                                        )}
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant="success">
