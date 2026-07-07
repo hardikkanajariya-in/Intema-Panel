@@ -53,6 +53,12 @@ export const secondaryNavigation: NavItem[] = [
         routeName: 'system.index',
     },
     {
+        title: 'Terminal',
+        href: '/system/terminal',
+        icon: Shield,
+        routeName: 'system.terminal',
+    },
+    {
         title: 'Files',
         href: '/files',
         icon: Folder,

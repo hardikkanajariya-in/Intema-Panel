@@ -120,24 +120,43 @@ class FileManagerService
     {
         $absolute = $this->resolvePath($path);
 
-        if (! is_file($absolute)) {
+        $isFile = @is_file($absolute);
+        if (! $isFile && DIRECTORY_SEPARATOR === '/') {
+            $process = new \Symfony\Component\Process\Process(['sudo', 'test', '-f', $absolute]);
+            $process->run();
+            $isFile = $process->isSuccessful();
+        }
+
+        if (! $isFile) {
             throw new FileNotFoundException("File not found: {$path}");
         }
 
-        if (! is_readable($absolute)) {
-            throw new \RuntimeException('Permission denied: file is not readable.');
+        $contents = false;
+        if (@is_readable($absolute)) {
+            $size = @filesize($absolute) ?: 0;
+            if ($size <= 2 * 1024 * 1024) {
+                $contents = @file_get_contents($absolute);
+            } else {
+                throw new \RuntimeException('File is too large to display (max 2 MB).');
+            }
         }
 
-        $size = @filesize($absolute) ?: 0;
-
-        if ($size > 2 * 1024 * 1024) {
-            throw new \RuntimeException('File is too large to display (max 2 MB).');
+        if ($contents === false) {
+            if (DIRECTORY_SEPARATOR === '/') {
+                $process = new \Symfony\Component\Process\Process(['sudo', 'cat', $absolute]);
+                $process->run();
+                if ($process->isSuccessful()) {
+                    $contents = $process->getOutput();
+                }
+            }
         }
-
-        $contents = file_get_contents($absolute);
 
         if ($contents === false) {
             throw new \RuntimeException('Unable to read file.');
+        }
+
+        if (strlen($contents) > 2 * 1024 * 1024) {
+            throw new \RuntimeException('File is too large to display (max 2 MB).');
         }
 
         return $contents;
@@ -147,11 +166,33 @@ class FileManagerService
     {
         $absolute = $this->resolvePath($path);
 
-        if (! is_writable($absolute)) {
-            throw new \RuntimeException('Permission denied: file is not writable.');
+        if (@is_writable($absolute)) {
+            if (@file_put_contents($absolute, $contents) !== false) {
+                return;
+            }
         }
 
-        file_put_contents($absolute, $contents);
+        if (DIRECTORY_SEPARATOR === '/') {
+            $tempFile = tempnam(sys_get_temp_dir(), 'panel_edit_');
+            if ($tempFile === false) {
+                throw new \RuntimeException('Failed to create temporary file.');
+            }
+            if (file_put_contents($tempFile, $contents) === false) {
+                @unlink($tempFile);
+                throw new \RuntimeException('Failed to write to temporary file.');
+            }
+
+            $process = new \Symfony\Component\Process\Process(['sudo', 'cp', $tempFile, $absolute]);
+            $process->run();
+            @unlink($tempFile);
+
+            if ($process->isSuccessful()) {
+                return;
+            }
+            throw new \RuntimeException('Permission denied: failed to copy via sudo cp. ' . $process->getErrorOutput());
+        }
+
+        throw new \RuntimeException('Permission denied: file is not writable.');
     }
 
     public function isEditable(string $path): bool
@@ -159,7 +200,14 @@ class FileManagerService
         try {
             $absolute = $this->resolvePath($path);
 
-            return is_file($absolute) && is_writable($absolute) && $this->isTextFile($absolute);
+            $isFile = @is_file($absolute);
+            if (! $isFile && DIRECTORY_SEPARATOR === '/') {
+                $process = new \Symfony\Component\Process\Process(['sudo', 'test', '-f', $absolute]);
+                $process->run();
+                $isFile = $process->isSuccessful();
+            }
+
+            return $isFile;
         } catch (\Throwable) {
             return false;
         }
@@ -170,13 +218,31 @@ class FileManagerService
         $absolute = $this->resolvePath($path);
         $target = rtrim($absolute, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $name;
 
-        if (file_exists($target)) {
+        $exists = @file_exists($target);
+        if (! $exists && DIRECTORY_SEPARATOR === '/') {
+            $process = new \Symfony\Component\Process\Process(['sudo', 'test', '-e', $target]);
+            $process->run();
+            $exists = $process->isSuccessful();
+        }
+
+        if ($exists) {
             throw new \RuntimeException("Already exists: {$name}");
         }
 
-        if (! @mkdir($target, 0755, true)) {
-            throw new \RuntimeException("Failed to create directory. Check permissions.");
+        if (@mkdir($target, 0755, true)) {
+            return;
         }
+
+        if (DIRECTORY_SEPARATOR === '/') {
+            $process = new \Symfony\Component\Process\Process(['sudo', 'mkdir', '-p', $target]);
+            $process->run();
+            if ($process->isSuccessful()) {
+                return;
+            }
+            throw new \RuntimeException("Failed to create directory via sudo mkdir: " . $process->getErrorOutput());
+        }
+
+        throw new \RuntimeException("Failed to create directory. Check permissions.");
     }
 
     public function createFile(string $path, string $name): void
@@ -184,13 +250,31 @@ class FileManagerService
         $absolute = $this->resolvePath($path);
         $target = rtrim($absolute, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $name;
 
-        if (file_exists($target)) {
+        $exists = @file_exists($target);
+        if (! $exists && DIRECTORY_SEPARATOR === '/') {
+            $process = new \Symfony\Component\Process\Process(['sudo', 'test', '-e', $target]);
+            $process->run();
+            $exists = $process->isSuccessful();
+        }
+
+        if ($exists) {
             throw new \RuntimeException("Already exists: {$name}");
         }
 
-        if (! @file_put_contents($target, '') !== false) {
-            throw new \RuntimeException("Failed to create file. Check permissions.");
+        if (@file_put_contents($target, '') !== false) {
+            return;
         }
+
+        if (DIRECTORY_SEPARATOR === '/') {
+            $process = new \Symfony\Component\Process\Process(['sudo', 'touch', $target]);
+            $process->run();
+            if ($process->isSuccessful()) {
+                return;
+            }
+            throw new \RuntimeException("Failed to create file via sudo touch: " . $process->getErrorOutput());
+        }
+
+        throw new \RuntimeException("Failed to create file. Check permissions.");
     }
 
     public function delete(string $path): void
@@ -201,12 +285,42 @@ class FileManagerService
             throw new \RuntimeException('Cannot delete root directory.');
         }
 
-        if (is_dir($absolute)) {
-            $this->deleteDirectory($absolute);
-        } else {
-            if (! @unlink($absolute)) {
-                throw new \RuntimeException("Failed to delete file. Check permissions.");
+        $isDir = @is_dir($absolute);
+        if (! $isDir && DIRECTORY_SEPARATOR === '/') {
+            $process = new \Symfony\Component\Process\Process(['sudo', 'test', '-d', $absolute]);
+            $process->run();
+            $isDir = $process->isSuccessful();
+        }
+
+        if ($isDir) {
+            try {
+                $this->deleteDirectory($absolute);
+            } catch (\Throwable $e) {
+                if (DIRECTORY_SEPARATOR === '/') {
+                    $process = new \Symfony\Component\Process\Process(['sudo', 'rm', '-rf', $absolute]);
+                    $process->run();
+                    if ($process->isSuccessful()) {
+                        return;
+                    }
+                    throw new \RuntimeException("Failed to delete directory via sudo rm: " . $process->getErrorOutput());
+                }
+                throw $e;
             }
+        } else {
+            if (@unlink($absolute)) {
+                return;
+            }
+
+            if (DIRECTORY_SEPARATOR === '/') {
+                $process = new \Symfony\Component\Process\Process(['sudo', 'rm', '-f', $absolute]);
+                $process->run();
+                if ($process->isSuccessful()) {
+                    return;
+                }
+                throw new \RuntimeException("Failed to delete file via sudo rm: " . $process->getErrorOutput());
+            }
+
+            throw new \RuntimeException("Failed to delete file. Check permissions.");
         }
     }
 
@@ -216,13 +330,31 @@ class FileManagerService
         $parent = dirname($absolute);
         $target = $parent . DIRECTORY_SEPARATOR . $newName;
 
-        if (file_exists($target)) {
+        $exists = @file_exists($target);
+        if (! $exists && DIRECTORY_SEPARATOR === '/') {
+            $process = new \Symfony\Component\Process\Process(['sudo', 'test', '-e', $target]);
+            $process->run();
+            $exists = $process->isSuccessful();
+        }
+
+        if ($exists) {
             throw new \RuntimeException("Already exists: {$newName}");
         }
 
-        if (! @rename($absolute, $target)) {
-            throw new \RuntimeException("Failed to rename. Check permissions.");
+        if (@rename($absolute, $target)) {
+            return;
         }
+
+        if (DIRECTORY_SEPARATOR === '/') {
+            $process = new \Symfony\Component\Process\Process(['sudo', 'mv', $absolute, $target]);
+            $process->run();
+            if ($process->isSuccessful()) {
+                return;
+            }
+            throw new \RuntimeException("Failed to rename via sudo mv: " . $process->getErrorOutput());
+        }
+
+        throw new \RuntimeException("Failed to rename. Check permissions.");
     }
 
     private function resolvePath(string $path): string

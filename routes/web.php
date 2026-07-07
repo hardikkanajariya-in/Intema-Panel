@@ -67,6 +67,8 @@ Route::middleware('setup')->group(function () {
         Route::get('/system', [SystemController::class, 'index'])->name('system.index');
         Route::post('/system/action', [SystemController::class, 'action'])->name('system.action');
         Route::post('/system/update', [SystemController::class, 'update'])->name('system.update');
+        Route::get('/system/terminal', [SystemController::class, 'terminal'])->name('system.terminal');
+        Route::post('/system/terminal/run', [SystemController::class, 'runTerminalCommand'])->name('system.terminal.run');
 
         Route::get('/files', [FileManagerController::class, 'index'])->name('files.index');
         Route::get('/files/show', [FileManagerController::class, 'show'])->name('files.show');

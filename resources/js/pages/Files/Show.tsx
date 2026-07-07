@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import type { FormEvent } from 'react';
+import { type FormEvent, useState } from 'react';
 
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -20,6 +20,14 @@ export default function FilesShow({
     editable,
     error,
 }: FilesShowProps) {
+    const [isEditing, setIsEditing] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('edit') === 'true';
+        }
+        return false;
+    });
+
     const { data, setData, put, processing } = useForm({
         path,
         contents,
@@ -27,7 +35,11 @@ export default function FilesShow({
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
-        put('/files');
+        put('/files', {
+            onSuccess: () => {
+                setIsEditing(false);
+            }
+        });
     };
 
     const pathParts = path.split('/').filter(Boolean);
@@ -51,12 +63,22 @@ export default function FilesShow({
                 breadcrumbs={breadcrumbs}
                 actions={
                     !error && (
-                        <Button
-                            variant="outline"
-                            href={`/files/download?path=${encodeURIComponent(path)}`}
-                        >
-                            Download
-                        </Button>
+                        <div className="flex gap-2">
+                            {!isEditing && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsEditing(true)}
+                                >
+                                    Edit
+                                </Button>
+                            )}
+                            <Button
+                                variant="outline"
+                                href={`/files/download?path=${encodeURIComponent(path)}`}
+                            >
+                                Download
+                            </Button>
+                        </div>
                     )
                 }
             />
@@ -82,11 +104,11 @@ export default function FilesShow({
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            {editable ? 'Edit File' : 'View File'}
+                            {isEditing ? 'Edit File' : 'View File'}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {editable ? (
+                        {isEditing ? (
                             <form onSubmit={submit} className="space-y-4">
                                 <Textarea
                                     rows={25}
@@ -102,9 +124,7 @@ export default function FilesShow({
                                     </Button>
                                     <Button
                                         variant="outline"
-                                        href={`/files?path=${encodeURIComponent(
-                                            path.substring(0, path.lastIndexOf('/')) || '/',
-                                        )}`}
+                                        onClick={() => setIsEditing(false)}
                                     >
                                         Cancel
                                     </Button>

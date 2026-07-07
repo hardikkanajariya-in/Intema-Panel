@@ -54,4 +54,59 @@ class SystemController extends Controller
 
         return back()->with('success', 'Panel update triggered in the background. Please wait a few moments for the services to restart.');
     }
+
+    public function terminal(): Response
+    {
+        return Inertia::render('System/Terminal');
+    }
+
+    public function runTerminalCommand(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $validated = $request->validate([
+            'command' => ['required', 'string'],
+        ]);
+
+        $command = $validated['command'];
+
+        return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($command) {
+            if (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
+            header('Connection: keep-alive');
+            header('X-Accel-Buffering: no');
+
+            $process = \Symfony\Component\Process\Process::fromShellCommandline($command);
+            $process->setTimeout(null);
+
+            $process->run(function ($type, $buffer) {
+                echo "data: " . json_encode([
+                    'type' => $type === \Symfony\Component\Process\Process::ERR ? 'stderr' : 'stdout',
+                    'output' => $buffer,
+                ]) . "\n\n";
+
+                if (ob_get_level() > 0) {
+                    ob_flush();
+                }
+                flush();
+            });
+
+            echo "data: " . json_encode([
+                'type' => 'exit',
+                'code' => $process->getExitCode(),
+            ]) . "\n\n";
+
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
+            flush();
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
 }

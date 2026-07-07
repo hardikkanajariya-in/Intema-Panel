@@ -385,13 +385,22 @@ export default function FilesIndex({ path, entries, error }: FilesIndexProps) {
                                                                 Rename
                                                             </Button>
                                                             {entry.type === 'file' && (
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="ghost"
-                                                                    href={`/files/download?path=${encodeURIComponent(entry.path)}`}
-                                                                >
-                                                                    Download
-                                                                </Button>
+                                                                <>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        href={`/files/show?path=${encodeURIComponent(entry.path)}&edit=true`}
+                                                                    >
+                                                                        Edit
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        href={`/files/download?path=${encodeURIComponent(entry.path)}`}
+                                                                    >
+                                                                        Download
+                                                                    </Button>
+                                                                </>
                                                             )}
                                                             <Button
                                                                 size="sm"
