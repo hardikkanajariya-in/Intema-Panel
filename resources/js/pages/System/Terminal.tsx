@@ -23,13 +23,14 @@ function getCookie(name: string): string | null {
     return null;
 }
 
-export default function Terminal() {
+export default function Terminal({ initialCwd = '/' }: { initialCwd?: string }) {
     const [lines, setLines] = useState<TerminalLine[]>([
         { type: 'system', text: 'Welcome to the Intema Panel Terminal.' },
         { type: 'system', text: 'Type any shell command below. Use Ctrl+C to abort running processes.' },
     ]);
     const [inputValue, setInputValue] = useState('');
     const [isRunning, setIsRunning] = useState(false);
+    const [cwd, setCwd] = useState(initialCwd);
     const [commandHistory, setCommandHistory] = useState<string[]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -125,7 +126,7 @@ export default function Terminal() {
         }
 
         // Output command prompt line
-        setLines((prev) => [...prev, { type: 'prompt', text: `admin@intema-panel:~$ ${command}` }]);
+        setLines((prev) => [...prev, { type: 'prompt', text: `admin@intema-panel:${cwd}$ ${command}` }]);
         setIsRunning(true);
 
         const abortController = new AbortController();
@@ -138,7 +139,7 @@ export default function Terminal() {
                     'Content-Type': 'application/json',
                     'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') || '',
                 },
-                body: JSON.stringify({ command }),
+                body: JSON.stringify({ command, cwd }),
                 signal: abortController.signal,
             });
 
@@ -171,6 +172,9 @@ export default function Terminal() {
                                     ...prev,
                                     { type: 'system', text: `Process exited with code ${data.code}` },
                                 ]);
+                                if (data.cwd) {
+                                    setCwd(data.cwd);
+                                }
                             }
                         } catch (err) {
                             // Suppress JSON parsing errors for partial lines
@@ -281,7 +285,7 @@ export default function Terminal() {
                         {/* Interactive prompt input */}
                         <form onSubmit={handleFormSubmit} className="flex items-center pt-1.5">
                             <span className="text-emerald-400 font-semibold mr-2 shrink-0">
-                                admin@intema-panel:~$
+                                admin@intema-panel:{cwd}$
                             </span>
                             <input
                                 ref={inputRef}

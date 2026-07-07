@@ -57,18 +57,22 @@ class SystemController extends Controller
 
     public function terminal(): Response
     {
-        return Inertia::render('System/Terminal');
+        return Inertia::render('System/Terminal', [
+            'initialCwd' => base_path(),
+        ]);
     }
 
     public function runTerminalCommand(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $validated = $request->validate([
             'command' => ['required', 'string'],
+            'cwd' => ['nullable', 'string'],
         ]);
 
         $command = $validated['command'];
+        $cwd = $validated['cwd'] ?: base_path();
 
-        return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($command) {
+        return new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($command, $cwd) {
             if (ob_get_level() > 0) {
                 ob_end_clean();
             }
@@ -78,14 +82,36 @@ class SystemController extends Controller
             header('Connection: keep-alive');
             header('X-Accel-Buffering: no');
 
-            $process = \Symfony\Component\Process\Process::fromShellCommandline($command);
+            // Format command to execute and append the unique PWD marker
+            $shellCommand = "cd " . escapeshellarg($cwd) . " && (" . $command . ") ; echo -n '__INTERNAL_PANEL_PWD_MARKER__' && pwd";
+
+            $process = \Symfony\Component\Process\Process::fromShellCommandline($shellCommand);
             $process->setTimeout(null);
 
-            $process->run(function ($type, $buffer) {
-                echo "data: " . json_encode([
-                    'type' => $type === \Symfony\Component\Process\Process::ERR ? 'stderr' : 'stdout',
-                    'output' => $buffer,
-                ]) . "\n\n";
+            $currentCwd = $cwd;
+
+            $process->run(function ($type, $buffer) use (&$currentCwd) {
+                if ($type === \Symfony\Component\Process\Process::OUT && str_contains($buffer, '__INTERNAL_PANEL_PWD_MARKER__')) {
+                    $parts = explode('__INTERNAL_PANEL_PWD_MARKER__', $buffer);
+                    $output = $parts[0];
+                    $newCwd = trim($parts[1]);
+
+                    if ($output !== '') {
+                        echo "data: " . json_encode([
+                            'type' => 'stdout',
+                            'output' => $output,
+                        ]) . "\n\n";
+                    }
+
+                    if ($newCwd !== '') {
+                        $currentCwd = $newCwd;
+                    }
+                } else {
+                    echo "data: " . json_encode([
+                        'type' => $type === \Symfony\Component\Process\Process::ERR ? 'stderr' : 'stdout',
+                        'output' => $buffer,
+                    ]) . "\n\n";
+                }
 
                 if (ob_get_level() > 0) {
                     ob_flush();
@@ -96,6 +122,7 @@ class SystemController extends Controller
             echo "data: " . json_encode([
                 'type' => 'exit',
                 'code' => $process->getExitCode(),
+                'cwd' => $currentCwd,
             ]) . "\n\n";
 
             if (ob_get_level() > 0) {
