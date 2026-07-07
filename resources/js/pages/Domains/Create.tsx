@@ -115,12 +115,21 @@ export default function DomainsCreate({
 
                         <div className="space-y-2">
                             <Label htmlFor="document_root">Document Root (optional)</Label>
-                            <Input
-                                id="document_root"
-                                value={data.document_root}
-                                onChange={(e) => setData('document_root', e.target.value)}
-                                placeholder="Auto-generated if empty"
-                            />
+                            <div className="flex rounded-md shadow-sm">
+                                <span className="inline-flex items-center rounded-l-md border border-r-0 border-border bg-muted px-3 text-muted-foreground text-sm font-mono select-none">
+                                    /var/www/
+                                </span>
+                                <Input
+                                    id="document_root"
+                                    value={data.document_root.replace(/^\/var\/www\//, '')}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setData('document_root', val ? `/var/www/${val}` : '');
+                                    }}
+                                    className="rounded-l-none"
+                                    placeholder="example.com"
+                                />
+                            </div>
                             {errors.document_root && (
                                 <p className="text-sm text-destructive">{errors.document_root}</p>
                             )}

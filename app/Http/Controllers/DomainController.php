@@ -36,6 +36,7 @@ class DomainController extends Controller
                     Domain::query()->create([
                         'hostname' => $hostname,
                         'status' => \App\Enums\ResourceStatus::Active,
+                        'source' => Domain::SOURCE_CLOUDFLARE,
                     ]);
                 }
             }
@@ -70,9 +71,15 @@ class DomainController extends Controller
 
         $cloudflareConfigured = ! empty(app(\App\Services\SettingService::class)->get('cloudflare_token'));
 
+        $nginxConfig = '';
+        if ($domain->nginx_site) {
+            $nginxConfig = $this->nginxService->getSiteConfig($domain->nginx_site);
+        }
+
         return Inertia::render('Domains/Show', [
             'domain' => DomainResource::make($domain)->resolve(),
             'cloudflareConfigured' => $cloudflareConfigured,
+            'nginxConfig' => $nginxConfig,
         ]);
     }
 
@@ -98,6 +105,10 @@ class DomainController extends Controller
     public function destroy(Domain $domain): RedirectResponse
     {
         $this->authorize('delete', $domain);
+
+        if ($domain->source === Domain::SOURCE_CLOUDFLARE) {
+            abort(403, 'Cloudflare-created domains cannot be deleted.');
+        }
 
         if ($domain->nginx_site) {
             $this->nginxService->deleteSite($domain->nginx_site);
@@ -142,7 +153,17 @@ class DomainController extends Controller
             'project_uuid' => ['required', 'string', 'exists:projects,uuid'],
             'hostname' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i'],
             'application_id' => ['nullable', 'exists:applications,uuid'],
-            'document_root' => ['nullable', 'string', 'max:500'],
+            'document_root' => [
+                'nullable',
+                'string',
+                'max:500',
+                'starts_with:/var/www/',
+                function ($attribute, $value, $fail) {
+                    if (str_contains($value, '..')) {
+                        $fail('The document root cannot contain directory traversal.');
+                    }
+                }
+            ],
             'notes' => ['nullable', 'string'],
         ]);
 
@@ -169,5 +190,68 @@ class DomainController extends Controller
         return redirect()
             ->route('domains.show', $domain)
             ->with('success', 'Domain created successfully.');
+    }
+
+    public function update(Request $request, Domain $domain): RedirectResponse
+    {
+        $this->authorize('update', $domain);
+
+        $validated = $request->validate([
+            'document_root' => [
+                'nullable',
+                'string',
+                'max:500',
+                'starts_with:/var/www/',
+                function ($attribute, $value, $fail) {
+                    if (str_contains($value, '..')) {
+                        $fail('The document root cannot contain directory traversal.');
+                    }
+                }
+            ],
+            'nginx_config' => ['nullable', 'string'],
+        ]);
+
+        try {
+            // Update document root
+            if (array_key_exists('document_root', $validated)) {
+                $domain->document_root = $validated['document_root'];
+            }
+
+            // Ensure site name exists if it is empty/null (e.g. Cloudflare domains)
+            if (empty($domain->nginx_site)) {
+                $domain->nginx_site = \Illuminate\Support\Str::slug($domain->hostname, '_');
+            }
+
+            // If Nginx config is updated
+            if (array_key_exists('nginx_config', $validated)) {
+                $nginxConfig = $validated['nginx_config'];
+
+                if (! empty($nginxConfig)) {
+                    // Update site config safely
+                    $result = $this->nginxService->updateSiteConfig($domain->nginx_site, $nginxConfig);
+                    if (! $result->successful()) {
+                        return back()->withInput()->with('error', 'Nginx config test failed: ' . $result->message());
+                    }
+                    // Mark status as active
+                    $domain->status = \App\Enums\ResourceStatus::Active;
+                }
+            } else {
+                // If they changed document root but did not specify nginx_config,
+                // and the site config doesn't exist yet, we can provision it
+                $currentConfig = $this->nginxService->getSiteConfig($domain->nginx_site);
+                if (empty($currentConfig) && ! empty($domain->document_root)) {
+                    $this->nginxService->createVirtualHost($domain->hostname, $domain->document_root);
+                    $this->nginxService->enableSite($domain->nginx_site);
+                    $this->nginxService->reload();
+                    $domain->status = \App\Enums\ResourceStatus::Active;
+                }
+            }
+
+            $domain->save();
+
+            return back()->with('success', 'Domain updated successfully.');
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Failed to update domain: ' . $e->getMessage());
+        }
     }
 }

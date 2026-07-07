@@ -54,6 +54,7 @@ export interface Domain {
     nginx_site: string | null;
     document_root: string | null;
     ssl_active: boolean;
+    source: string;
     status: string;
     status_label: string;
     project_id: number | null;

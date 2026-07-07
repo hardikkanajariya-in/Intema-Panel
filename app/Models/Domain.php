@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $notes
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property string $source
  * @property Carbon|null $deleted_at
  */
 #[Fillable([
@@ -38,12 +39,16 @@ use Illuminate\Support\Carbon;
     'document_root',
     'ssl_active',
     'status',
+    'source',
     'notes',
     'created_by',
     'updated_by',
 ])]
 class Domain extends Model
 {
+    public const SOURCE_SYSTEM = 'system';
+    public const SOURCE_CLOUDFLARE = 'cloudflare';
+
     /** @use HasFactory<DomainFactory> */
     use HasAuditFields, HasFactory, HasUuid, SoftDeletes;
 

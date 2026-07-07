@@ -57,7 +57,7 @@ Route::middleware('setup')->group(function () {
         Route::post('/databases/{database}/backups/{backup}/restore', [ManagedDatabaseController::class, 'restoreFromLog'])->name('databases.backups.restore');
         Route::post('/databases/{database}/reset-password', [ManagedDatabaseController::class, 'resetPassword'])->name('databases.reset-password');
 
-        Route::resource('domains', DomainController::class)->only(['index', 'show', 'create', 'store', 'destroy']);
+        Route::resource('domains', DomainController::class)->only(['index', 'show', 'create', 'store', 'update', 'destroy']);
         Route::post('/domains/{domain}/configure-ssl', [DomainController::class, 'configureSsl'])->name('domains.configure-ssl');
         Route::get('/domains/{domain}/dns-records', [DnsRecordController::class, 'index'])->name('domains.dns.index');
         Route::post('/domains/{domain}/dns-records', [DnsRecordController::class, 'store'])->name('domains.dns.store');

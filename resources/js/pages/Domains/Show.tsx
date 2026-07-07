@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 
@@ -23,17 +23,37 @@ import type { Domain } from '@/types/resource';
 interface DomainsShowProps {
     domain: Domain;
     cloudflareConfigured: boolean;
+    nginxConfig: string;
 }
 
 export default function DomainsShow({
     domain,
     cloudflareConfigured,
+    nginxConfig,
 }: DomainsShowProps) {
     const [records, setRecords] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [addingRecord, setAddingRecord] = useState(false);
     const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
+
+    const { data, setData, put, processing, errors } = useForm({
+        document_root: domain.document_root || '',
+        nginx_config: nginxConfig || '',
+    });
+
+    const handleUpdateDomain = (e: FormEvent) => {
+        e.preventDefault();
+        put(`/domains/${domain.uuid}`, {
+            preserveScroll: true,
+        });
+    };
+
+    const handleDeleteDomain = () => {
+        if (window.confirm(`Are you sure you want to delete the domain "${domain.hostname}"? This will delete the virtual host config and all associated configurations.`)) {
+            router.delete(`/domains/${domain.uuid}`);
+        }
+    };
 
     // Form state
     const [type, setType] = useState('A');
@@ -159,6 +179,25 @@ export default function DomainsShow({
                     { title: 'Domains', href: '/domains' },
                     { title: domain.hostname },
                 ]}
+                actions={
+                    domain.source !== 'cloudflare' ? (
+                        <Button
+                            variant="destructive"
+                            onClick={handleDeleteDomain}
+                        >
+                            Delete Domain
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="destructive"
+                            disabled
+                            title="Cloudflare-synced domains cannot be deleted"
+                            className="opacity-50 cursor-not-allowed"
+                        >
+                            Delete Domain
+                        </Button>
+                    )
+                }
             />
             <div className="space-y-6">
                 <div className="grid gap-6 lg:grid-cols-2">
@@ -167,6 +206,14 @@ export default function DomainsShow({
                             <CardTitle>Domain Details</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2 text-sm">
+                            <div>
+                                <span className="text-muted-foreground">
+                                    Source:
+                                </span>{' '}
+                                <Badge variant={domain.source === 'cloudflare' ? 'secondary' : 'default'}>
+                                    {domain.source === 'cloudflare' ? 'Cloudflare Sync' : 'System Managed'}
+                                </Badge>
+                            </div>
                             <div>
                                 <span className="text-muted-foreground">
                                     Nginx Site:
@@ -408,6 +455,56 @@ export default function DomainsShow({
                                 </Table>
                             </div>
                         )}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Edit Domain Configuration</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleUpdateDomain} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_document_root">Document Root (under /var/www/)</Label>
+                                <div className="flex rounded-md shadow-sm max-w-xl">
+                                    <span className="inline-flex items-center rounded-l-md border border-r-0 border-border bg-muted px-3 text-muted-foreground text-sm font-mono select-none">
+                                        /var/www/
+                                    </span>
+                                    <Input
+                                        id="edit_document_root"
+                                        value={data.document_root.replace(/^\/var\/www\//, '')}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setData('document_root', val ? `/var/www/${val}` : '');
+                                        }}
+                                        className="rounded-l-none"
+                                        placeholder="example.com"
+                                    />
+                                </div>
+                                {errors.document_root && (
+                                    <p className="text-sm text-destructive">{errors.document_root}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_nginx_config">Nginx Virtual Host Configuration</Label>
+                                <textarea
+                                    id="edit_nginx_config"
+                                    value={data.nginx_config}
+                                    onChange={(e) => setData('nginx_config', e.target.value)}
+                                    rows={15}
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    placeholder="# Virtual host config file"
+                                />
+                                {errors.nginx_config && (
+                                    <p className="text-sm text-destructive">{errors.nginx_config}</p>
+                                )}
+                            </div>
+
+                            <Button type="submit" disabled={processing}>
+                                {processing ? 'Saving...' : 'Save Configuration'}
+                            </Button>
+                        </form>
                     </CardContent>
                 </Card>
             </div>
