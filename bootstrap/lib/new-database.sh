@@ -58,8 +58,25 @@ success "Database ready: ${DB_NAME}"
 log ""
 log "  Database: ${DB_NAME}"
 log "  User:     ${DB_USER}"
-log "  Host:     localhost"
 log "  Port:     5432"
 log ""
-log "Connection string:"
-log "  postgresql://${DB_USER}:<password>@localhost:5432/${DB_NAME}"
+
+# Load global configuration if available
+readonly CONFIG_FILE="/etc/intema/config"
+DB_DOMAIN=""
+if [[ -f "${CONFIG_FILE}" ]]; then
+    # shellcheck disable=SC1091
+    DB_DOMAIN=$(grep -oP '^INTEMA_DB_DOMAIN="\K[^"]+' "${CONFIG_FILE}" || true)
+fi
+
+# Determine remote host (either the globally saved domain or public IP fallback)
+REMOTE_HOST="${DB_DOMAIN:-}"
+if [[ -z "${REMOTE_HOST}" ]]; then
+    REMOTE_HOST=$(curl -s --max-time 2 https://ipinfo.io/ip || hostname -I | awk '{print $1}')
+fi
+
+log "Local connection string (localhost):"
+log "  postgresql://${DB_USER}:<password>@127.0.0.1:5432/${DB_NAME}"
+log ""
+log "Remote cloud connection string (SSL required):"
+log "  postgresql://${DB_USER}:<password>@${REMOTE_HOST}:5432/${DB_NAME}?sslmode=require"

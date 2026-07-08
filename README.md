@@ -20,11 +20,16 @@ sudo intema install web
 
 ### 2. Install Database
 
-Installs the latest PostgreSQL server and sets the database root password. By default, it configures the default `postgres` root user, but you can specify a different name using the optional `--user` flag.
+Installs the latest PostgreSQL server, sets the database root password, and saves your custom database domain (e.g. routed via Cloudflare DNS) globally.
 
 ```bash
-sudo intema install db --password=secretpass123
+sudo intema install db --password=secretpass123 --domain=db.example.com
 ```
+
+Options:
+* `--password` (Required): The password for the database root user.
+* `--user` (Optional): The database root username (defaults to `postgres`).
+* `--domain` (Optional): Saves the domain globally in `/etc/intema/config` for all future database connection strings.
 
 ### 3. Create a New Site
 
@@ -48,13 +53,25 @@ sudo intema new --domain=docs.mydomain.com --plt=static
 
 ### 4. Create a Database
 
-Creates a PostgreSQL database with a dedicated user and proper isolation.
+Creates a PostgreSQL database with a dedicated user, proper isolation, and outputs ready-to-use connection strings. It automatically uses the domain you configured globally during `install db` (or falls back to the public IP).
 
 ```bash
 sudo intema new database --name=mydb --user=myuser --password=mypassword
 ```
 
-### 5. Secure VPS
+### 5. PostgreSQL Public Access Toggle
+
+Easily enable or disable public TCP access to your database from external networks (like Vercel, Railway, or Render) at the firewall level without any service downtime.
+
+```bash
+# Block all external TCP access (local connections still work)
+sudo intema db:off
+
+# Allow remote TCP access (port 5432)
+sudo intema db:on
+```
+
+### 6. Secure VPS
 
 Applies production security hardening in one command — no interaction needed.
 
@@ -75,7 +92,7 @@ sudo intema secure
 | Protocols | Disables unused protocols (dccp, sctp, rds, tipc) |
 | Nginx | Security headers (X-Frame-Options, X-Content-Type-Options, etc.), hides version |
 
-### 6. Health Check
+### 7. Health Check
 
 ```bash
 sudo intema doctor

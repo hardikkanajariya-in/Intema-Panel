@@ -31,3 +31,58 @@ if [[ "${SUPER_USER}" != "postgres" ]]; then
         sudo -u postgres psql -c "CREATE USER \"${SUPER_USER}\" WITH SUPERUSER PASSWORD '${SUPER_PASSWORD}';"
     fi
 fi
+
+# ─── Configure Remote Access & SSL (Cloud-ready) ──────────────────────────
+
+# Determine PostgreSQL version and config path
+readonly PG_VERSION=$(psql --version | awk '{print $3}' | cut -d. -f1)
+readonly PG_CONF_DIR="/etc/postgresql/${PG_VERSION}/main"
+
+if [[ -d "${PG_CONF_DIR}" ]]; then
+    echo "Configuring PostgreSQL ${PG_VERSION} for secure remote access..."
+
+    # 1. Listen on all network interfaces
+    sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" "${PG_CONF_DIR}/postgresql.conf"
+    sed -i "s/listen_addresses = 'localhost'/listen_addresses = '*'/g" "${PG_CONF_DIR}/postgresql.conf"
+
+    # 2. Force SSL/TLS and use SCRAM-SHA-256 for all remote host connections
+    # We append these to pg_hba.conf
+    if [[ -f "${PG_CONF_DIR}/pg_hba.conf" ]]; then
+        # Add scram-sha-256 as default encryption method if not already there
+        sed -i "s/#password_encryption = scram-sha-256/password_encryption = scram-sha-256/g" "${PG_CONF_DIR}/postgresql.conf" || true
+        
+        # Remove old matching wildcard records to avoid duplicate rules
+        sed -i '/hostssl.*all.*all.*0.0.0.0\/0/d' "${PG_CONF_DIR}/pg_hba.conf"
+        sed -i '/hostssl.*all.*all.*::\/0/d' "${PG_CONF_DIR}/pg_hba.conf"
+
+        # Append remote SSL-only SCRAM rules
+        echo "hostssl all all 0.0.0.0/0 scram-sha-256" >> "${PG_CONF_DIR}/pg_hba.conf"
+        echo "hostssl all all ::/0 scram-sha-256" >> "${PG_CONF_DIR}/pg_hba.conf"
+    fi
+
+    # Restart PostgreSQL to apply changes
+    systemctl restart postgresql
+    echo "PostgreSQL remote connections enabled & SSL required successfully."
+else
+    echo "WARNING: Could not find PostgreSQL config directory at ${PG_CONF_DIR}." >&2
+fi
+
+# ─── Configure Firewall ──────────────────────────────────────────────────────
+
+if command -v ufw >/dev/null 2>&1; then
+    echo "Opening PostgreSQL port 5432 in firewall..."
+    ufw allow 5432/tcp
+    if ufw status | grep -q "Status: active"; then
+        ufw reload
+    fi
+fi
+
+# ─── Save Configuration ──────────────────────────────────────────────────────
+
+echo "Saving global configuration..."
+mkdir -p /etc/intema
+if [[ -n "${INTEMA_SUPER_DOMAIN:-}" ]]; then
+    echo "INTEMA_DB_DOMAIN=\"${INTEMA_SUPER_DOMAIN}\"" > /etc/intema/config
+else
+    touch /etc/intema/config
+fi

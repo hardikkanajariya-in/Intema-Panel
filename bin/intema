@@ -17,9 +17,11 @@ Usage:
 
 Commands:
   install web                Install web stack (Nginx, Certbot, Node, pnpm, PM2, PHP 8.4)
-  install db --password=PASS [--user=USER]   Install PostgreSQL server and set root password
+  install db --password=PASS [--user=USER] [--domain=DOMAIN]   Install PostgreSQL and set root password & domain
   new --domain=DOMAIN --plt=PLATFORM   Create a new site with Nginx + SSL
   new database --name=NAME --user=USER --password=PASS   Create a PostgreSQL database
+  db:on                      Enable public network access to PostgreSQL (opens port 5432)
+  db:off                     Disable public network access to PostgreSQL (closes port 5432)
   secure                     Harden VPS security (SSH, firewall, fail2ban, auto-updates)
   doctor                     Run system health checks
 
@@ -35,11 +37,12 @@ Platforms (--plt):
 
 Examples:
   sudo intema install web
-  sudo intema install db --password=secretpass123
+  sudo intema install db --password=secretpass123 --domain=db.example.com
   sudo intema new --domain=example.com --plt=nextjs
   sudo intema new --domain=api.example.com --plt=nestjs --port=4000
   sudo intema new --domain=app.example.com --plt=laravel
   sudo intema new database --name=mydb --user=myuser --password=secretpass123
+  sudo intema db:off
   sudo intema secure
 EOF
 }
@@ -61,22 +64,25 @@ cmd_install() {
             ;;
         db)
             require_root
-            local db_user="postgres" db_password=""
+            local db_user="postgres" db_password="" db_domain=""
             while [[ $# -gt 0 ]]; do
                 case "$1" in
                     --user=*) db_user="${1#*=}" ;;
                     --user) shift; db_user="${1:-}" ;;
                     --password=*) db_password="${1#*=}" ;;
                     --password) shift; db_password="${1:-}" ;;
+                    --domain=*) db_domain="${1#*=}" ;;
+                    --domain) shift; db_domain="${1:-}" ;;
                     *) error "Unknown option: $1" ;;
                 esac
                 shift
             done
             if [[ -z "${db_password}" ]]; then
-                error "Missing required option --password. Usage: sudo intema install db --password=super_password [--user=super_user]"
+                error "Missing required option --password. Usage: sudo intema install db --password=super_password [--user=super_user] [--domain=db.example.com]"
             fi
             export INTEMA_SUPER_USER="${db_user}"
             export INTEMA_SUPER_PASSWORD="${db_password}"
+            export INTEMA_SUPER_DOMAIN="${db_domain}"
             bash "${ROOT_DIR}/bootstrap/lib/install-db.sh"
             ;;
         "")
@@ -167,6 +173,34 @@ cmd_secure() {
     bash "${ROOT_DIR}/bootstrap/lib/secure.sh"
 }
 
+cmd_db_on() {
+    require_root
+    if command -v ufw >/dev/null 2>&1; then
+        log "Enabling public network access to PostgreSQL (opening port 5432)..."
+        ufw allow 5432/tcp
+        if ufw status | grep -q "Status: active"; then
+            ufw reload
+        fi
+        success "PostgreSQL public access enabled (port 5432 open)."
+    else
+        error "UFW firewall is not installed. Could not enable public access safely."
+    fi
+}
+
+cmd_db_off() {
+    require_root
+    if command -v ufw >/dev/null 2>&1; then
+        log "Disabling public network access to PostgreSQL (closing port 5432)..."
+        ufw delete allow 5432/tcp || true
+        if ufw status | grep -q "Status: active"; then
+            ufw reload
+        fi
+        success "PostgreSQL public access disabled (port 5432 closed)."
+    else
+        error "UFW firewall is not installed."
+    fi
+}
+
 # --- Main dispatcher ---
 case "${1:-}" in
     install)
@@ -182,6 +216,12 @@ case "${1:-}" in
         ;;
     secure)
         cmd_secure
+        ;;
+    db:on)
+        cmd_db_on
+        ;;
+    db:off)
+        cmd_db_off
         ;;
     -v | --version)
         echo "intema ${VERSION}"
