@@ -1,32 +1,169 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Resolve symlinks to get the actual installation directory
+readonly VERSION="1.0.0"
 REAL_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
 ROOT_DIR="$(cd "$(dirname "${REAL_PATH}")/.." && pwd)"
+readonly ROOT_DIR
 
+source "${ROOT_DIR}/bootstrap/lib/common.sh"
+
+usage() {
+    cat <<'EOF'
+Intema — VPS provisioning CLI
+
+Usage:
+  intema <command> [options]
+
+Commands:
+  install web                Install web stack (Nginx, Certbot, Node, pnpm, PM2, PHP 8.4)
+  install db                 Install PostgreSQL server
+  new --domain=DOMAIN --plt=PLATFORM   Create a new site with Nginx + SSL
+  new database --name=NAME --user=USER --password=PASS   Create a PostgreSQL database
+  doctor                     Run system health checks
+
+Options:
+  -h, --help                 Show this help
+  -v, --version              Show version
+
+Platforms (--plt):
+  nextjs    Reverse proxy (port 3000)
+  nestjs    Reverse proxy (port 3000)
+  laravel   PHP-FPM with try_files
+  static    Plain file serving
+
+Examples:
+  sudo intema install web
+  sudo intema install db
+  sudo intema new --domain=example.com --plt=nextjs
+  sudo intema new --domain=api.example.com --plt=nestjs --port=4000
+  sudo intema new --domain=app.example.com --plt=laravel
+  sudo intema new database --name=mydb --user=myuser --password=secretpass123
+EOF
+}
+
+require_root() {
+    if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+        error "This command must be run as root (use sudo)."
+    fi
+}
+
+cmd_install() {
+    local target="${1:-}"
+    shift || true
+
+    case "${target}" in
+        web)
+            require_root
+            bash "${ROOT_DIR}/bootstrap/lib/install-web.sh"
+            ;;
+        db)
+            require_root
+            bash "${ROOT_DIR}/bootstrap/lib/install-db.sh"
+            ;;
+        "")
+            error "Missing target. Usage: intema install <web|db>"
+            ;;
+        *)
+            error "Unknown install target: ${target}. Use 'web' or 'db'."
+            ;;
+    esac
+}
+
+cmd_new() {
+    local first_arg="${1:-}"
+
+    if [[ "${first_arg}" == "database" ]]; then
+        shift
+        require_root
+        cmd_new_database "$@"
+        return
+    fi
+
+    require_root
+    cmd_new_site "$@"
+}
+
+cmd_new_site() {
+    local domain="" platform="" port=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --domain=*) domain="${1#*=}" ;;
+            --domain) shift; domain="${1:-}" ;;
+            --plt=*) platform="${1#*=}" ;;
+            --plt) shift; platform="${1:-}" ;;
+            --port=*) port="${1#*=}" ;;
+            --port) shift; port="${1:-}" ;;
+            *) error "Unknown option: $1" ;;
+        esac
+        shift
+    done
+
+    if [[ -z "${domain}" ]]; then
+        error "Missing --domain. Usage: intema new --domain=example.com --plt=nextjs"
+    fi
+
+    if [[ -z "${platform}" ]]; then
+        error "Missing --plt. Usage: intema new --domain=example.com --plt=<nextjs|nestjs|laravel|static>"
+    fi
+
+    export INTEMA_DOMAIN="${domain}"
+    export INTEMA_PLATFORM="${platform}"
+    export INTEMA_PORT="${port}"
+    bash "${ROOT_DIR}/bootstrap/lib/new-site.sh"
+}
+
+cmd_new_database() {
+    local db_name="" db_user="" db_password=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --name=*) db_name="${1#*=}" ;;
+            --name) shift; db_name="${1:-}" ;;
+            --user=*) db_user="${1#*=}" ;;
+            --user) shift; db_user="${1:-}" ;;
+            --password=*) db_password="${1#*=}" ;;
+            --password) shift; db_password="${1:-}" ;;
+            *) error "Unknown option: $1" ;;
+        esac
+        shift
+    done
+
+    if [[ -z "${db_name}" || -z "${db_user}" || -z "${db_password}" ]]; then
+        error "Missing required options. Usage: intema new database --name=mydb --user=myuser --password=mypassword"
+    fi
+
+    export INTEMA_DB_NAME="${db_name}"
+    export INTEMA_DB_USER="${db_user}"
+    export INTEMA_DB_PASSWORD="${db_password}"
+    bash "${ROOT_DIR}/bootstrap/lib/new-database.sh"
+}
+
+cmd_doctor() {
+    bash "${ROOT_DIR}/bootstrap/lib/doctor.sh"
+}
+
+# --- Main dispatcher ---
 case "${1:-}" in
     install)
-        exec bash "${ROOT_DIR}/bootstrap/install.sh" "${@:2}"
+        shift
+        cmd_install "$@"
         ;;
-    update)
-        exec bash "${ROOT_DIR}/bootstrap/update.sh" "${@:2}"
+    new)
+        shift
+        cmd_new "$@"
         ;;
     doctor)
-        exec bash "${ROOT_DIR}/bootstrap/doctor.sh" "${@:2}"
+        cmd_doctor
         ;;
-    repair)
-        exec bash "${ROOT_DIR}/bootstrap/repair.sh" "${@:2}"
+    -v | --version)
+        echo "intema ${VERSION}"
         ;;
-    uninstall)
-        exec bash "${ROOT_DIR}/bootstrap/uninstall.sh" "${@:2}"
-        ;;
-    verify)
-        exec bash "${ROOT_DIR}/bootstrap/verify.sh" "${@:2}"
+    -h | --help | "")
+        usage
         ;;
     *)
-        echo "Intema Panel CLI"
-        echo "Usage: intema <install|update|doctor|repair|uninstall|verify>"
-        exit 1
+        error "Unknown command: $1. Run 'intema --help' for usage."
         ;;
 esac
