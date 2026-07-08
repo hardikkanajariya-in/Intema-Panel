@@ -15,68 +15,32 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.4"
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, intl, gd
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-
-      - name: Install PHP dependencies
-        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-cache
-
-      - name: Build frontend
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm run build
-
       - name: Create release archive
         run: |
           STAGING="$(mktemp -d)"
-          rsync -a \
-            --exclude=node_modules \
-            --exclude=.git \
-            --exclude=tests \
-            --exclude=.editorconfig \
-            --exclude=.github \
-            --exclude=.vscode \
-            --exclude=storage/logs \
-            --exclude=.env \
-            --exclude='bootstrap/cache/*.php' \
-            --exclude='storage/framework/cache/data' \
-            --exclude='storage/framework/sessions' \
-            --exclude='storage/framework/views' \
-            ./ "${STAGING}/intema-panel/"
+          mkdir -p "${STAGING}/intema"
 
-          for dir in storage/logs storage/framework/cache/data storage/framework/sessions storage/framework/views; do
-            mkdir -p "${STAGING}/intema-panel/${dir}"
-            if [[ -f "${dir}/.gitignore" ]]; then
-              cp "${dir}/.gitignore" "${STAGING}/intema-panel/${dir}/.gitignore"
-            fi
-          done
+          cp -r bin "${STAGING}/intema/"
+          cp -r bootstrap "${STAGING}/intema/"
+          cp -r scripts "${STAGING}/intema/"
+          cp bootstrap.sh "${STAGING}/intema/"
+          cp install.sh "${STAGING}/intema/"
+          cp LICENSE "${STAGING}/intema/"
+          cp README.md "${STAGING}/intema/"
 
-          tar -czf /tmp/intema-panel.tar.gz -C "${STAGING}" intema-panel
-          mv /tmp/intema-panel.tar.gz intema-panel.tar.gz
+          tar -czf /tmp/intema.tar.gz -C "${STAGING}" intema
+          mv /tmp/intema.tar.gz intema.tar.gz
           rm -rf "${STAGING}"
 
       - name: Generate SHA256 checksum
         run: |
-          sha256sum intema-panel.tar.gz > intema-panel.tar.gz.sha256
-          cat intema-panel.tar.gz.sha256
+          sha256sum intema.tar.gz > intema.tar.gz.sha256
+          cat intema.tar.gz.sha256
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            intema-panel.tar.gz
-            intema-panel.tar.gz.sha256
+            intema.tar.gz
+            intema.tar.gz.sha256
           generate_release_notes: true

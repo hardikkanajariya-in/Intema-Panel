@@ -3,29 +3,22 @@ set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/common.sh"
 
-log "Intema Panel Bootstrap Installer"
-log "Log file: ${LOG_FILE}"
+log "Intema CLI Installer"
+log "Installing CLI tool to /usr/local/bin/intema"
 
-if [[ "${INTEMA_ACTION:-}" == "upgrade" ]]; then
-    log "Upgrade mode: only running application deployment and verification steps"
-    run_step "Deploying application" "07-application.sh"
-    run_step "Verifying installation" "verify-install.sh"
-    
-    trap - ERR
-    log "Upgrade complete."
-    exit 0
-fi
+readonly INSTALL_DIR="${PANEL_INSTALL_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 
-run_step "Updating Ubuntu" "01-apt-update.sh"
-run_step "Installing base packages" "02-base-packages.sh"
-run_step "Installing PHP and Composer" "03-php-composer.sh"
-run_step "Installing PostgreSQL" "04-postgresql.sh"
-run_step "Installing Nginx and Certbot" "05-nginx-certbot.sh"
-run_step "Installing Node.js and Supervisor" "06-node-supervisor.sh"
-run_step "Deploying application" "07-application.sh"
-run_step "Configuring Nginx virtual host" "08-nginx-vhost.sh"
-run_step "Verifying installation" "verify-install.sh"
+# Set permissions on all scripts
+chmod +x "${INSTALL_DIR}/bin/intema" 2>/dev/null || true
+chmod +x "${INSTALL_DIR}/bootstrap/lib/"*.sh 2>/dev/null || true
+chmod +x "${INSTALL_DIR}/scripts/"*.sh 2>/dev/null || true
 
-trap - ERR
-log "Installation complete."
-log "Open http://$(hostname -I | awk '{print $1}') to complete the setup wizard."
+# Create symlink
+ln -sf "${INSTALL_DIR}/bin/intema" /usr/local/bin/intema
+
+success "Intema CLI installed!"
+log ""
+log "Usage:"
+log "  sudo intema install web    # Install web stack"
+log "  sudo intema install db     # Install PostgreSQL"
+log "  intema --help              # Show all commands"

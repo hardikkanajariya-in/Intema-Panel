@@ -1,116 +1,70 @@
-# Intema Panel
+# Intema
 
-**Infrastructure Resource Manager**
+A CLI tool to quickly provision Ubuntu VPS servers with a production-ready web stack.
 
-Intema Panel is an open-source, self-hosted infrastructure management system for single-server VPS environments. Organize independent resources — applications, databases, domains, and SSL certificates — under optional projects, with a provision engine that executes reusable native Linux tasks.
-
-Created by [Hardik Kanajariya](https://hardikkanajariya.in).
-
-## Features
-
-- **Project-based organization** — group resources optionally; nothing is auto-coupled
-- **Independent resources** — applications, PostgreSQL databases, domains, SSL certificates
-- **Provision Engine** — composable tasks (folder, user, clone, composer, nginx, SSL, etc.)
-- **Application provisioners** — Laravel, PHP, Static, Next.js (Vercel metadata), NestJS (metadata), API, Custom
-- **Encrypted credential storage** (SQLite metadata)
-- **Activity logging** with audit trail
-- **Dashboard** — projects, resources, server health, expiring certificates, deployments
-- **Server management** — PHP, Composer, Node, PostgreSQL, Nginx, Certbot, Git, Supervisor, Fail2Ban, UFW
-- **Light / dark mode** and single administrator authentication
-
-## Requirements
-
-- PHP 8.3+
-- Node.js 20+
-- Composer 2+
-- PostgreSQL 14+
-- Nginx
-- Linux server (Ubuntu/Debian recommended)
-
-## Quick Install (Ubuntu 24.04 / 26.04 LTS)
-
-Ensure your domain name (e.g., `panel.example.com`) is pointing to your server's IP address, then run:
+## Quick Install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hardikkanajariya-in/Intema-Panel/main/bootstrap.sh | sudo bash
 ```
 
-*Note: The script will prompt you for your domain name to configure Nginx and attempt automatic SSL generation. You can also pass the domain name directly via a CLI flag:*
-`curl -fsSL https://raw.githubusercontent.com/hardikkanajariya-in/Intema-Panel/main/bootstrap.sh | sudo bash -s -- --domain=panel.example.com`
+## Usage
 
-Or clone and run:
+### 1. Install Web Stack
 
-```bash
-git clone https://github.com/hardikkanajariya/intema-panel.git
-cd intema-panel
-sudo chmod +x bootstrap/install.sh bin/intema scripts/*.sh
-sudo ./bootstrap.sh --domain=panel.example.com
-```
-
-Open `https://panel.example.com` (or `http://panel.example.com` if SSL setup was bypassed) and complete the **Setup Wizard**.
-
-To update the panel to the latest version without losing any configuration or database data, simply run:
+Installs Nginx, Certbot, Node.js LTS, pnpm, PM2, PHP 8.4 (with PostgreSQL, MySQL, SQLite, Redis, GD, Imagick extensions), and Composer.
 
 ```bash
-intema update
+sudo intema install web
 ```
 
-(Or `/opt/intema-panel/bin/intema update` if you haven't linked the CLI globally yet).
+### 2. Install Database
 
-## CLI
+Installs the latest PostgreSQL server, enables and starts the service. Ready to use.
 
 ```bash
-sudo ln -sf /opt/intema-panel/bin/intema /usr/local/bin/intema
-intema install    # Full server bootstrap (idempotent)
-intema update     # Update panel
-intema doctor     # Health checks
-intema repair     # Fix permissions and rebuild
-intema verify     # Validate installation
-intema uninstall  # Remove build artifacts
+sudo intema install db
 ```
 
-## Configuration
+### 3. Create a New Site
 
-Copy `.env.example` to `.env` and configure:
-
-- `PANEL_PG_*` — PostgreSQL admin credentials
-- `PANEL_NAME`, `PANEL_TAGLINE` — branding (defaults in `config/panel.php`)
-- `ADMIN_EMAIL` / `ADMIN_PASSWORD` — administrator account
-
-## Development
+Creates a Nginx virtual host with platform-specific configuration and obtains an SSL certificate automatically.
 
 ```bash
-composer install
-npm install
-cp .env.example .env
-php artisan key:generate
-touch database/database.sqlite
-php artisan migrate
-composer run dev
+sudo intema new --domain=mydomain.com --plt=nextjs
+sudo intema new --domain=api.mydomain.com --plt=nestjs --port=4000
+sudo intema new --domain=app.mydomain.com --plt=laravel
+sudo intema new --domain=docs.mydomain.com --plt=static
 ```
 
-## Architecture
+**Supported platforms:**
 
+| Platform | Config |
+|----------|--------|
+| `nextjs` | Reverse proxy → `127.0.0.1:3000` |
+| `nestjs` | Reverse proxy → `127.0.0.1:3000` |
+| `laravel` | PHP-FPM with `try_files` rewrite |
+| `static` | Plain file serving |
+
+### 4. Create a Database
+
+Creates a PostgreSQL database with a dedicated user and proper isolation.
+
+```bash
+sudo intema new database --name=mydb --user=myuser --password=mypassword
 ```
-Project (organizational)
-  └── Resources (independent)
-        ├── Applications  → Provisioners → Tasks → Shell
-        ├── Databases     → PostgreSQL scripts
-        ├── Domains       → Nginx (optional)
-        └── SSL           → Certbot (optional)
+
+### 5. Health Check
+
+```bash
+sudo intema doctor
 ```
 
-- **Laravel 13** — backend, authentication, policies, validation
-- **React + Inertia v3** — SPA frontend with TypeScript
-- **SQLite** — panel metadata (`projects`, `applications`, `databases`, `domains`, `ssl_certificates`, `deployments`)
-- **Shell scripts** — native Linux provisioning (no Docker)
+## Requirements
 
-See [docs/architecture.md](docs/architecture.md) for details, and [docs/cloudflare-dns.md](docs/cloudflare-dns.md) for Cloudflare DNS integration instructions.
+- Ubuntu 22.04+ (amd64 or arm64)
+- Root access
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: see [SECURITY.md](SECURITY.md).
+[MIT](LICENSE)
