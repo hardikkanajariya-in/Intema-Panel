@@ -136,7 +136,6 @@ branch_archive_url() {
 
 install_from_archive() {
     local archive_url="$1"
-    local strip="${2:-0}"
 
     local temp_dir
     temp_dir="$(mktemp -d)"
@@ -151,21 +150,10 @@ install_from_archive() {
         error "Archive integrity check failed." 4
     fi
 
-    # Extract
+    # Extract (both release and branch archives have a single root directory)
     log "Extracting..."
     mkdir -p "${INTEMA_INSTALL_DIR}"
-    if [[ "${strip}" -gt 0 ]]; then
-        tar -xzf "${archive}" -C "${INTEMA_INSTALL_DIR}" --strip-components="${strip}"
-    else
-        # Check if archive has a single root directory
-        local root_count
-        root_count="$(tar -tzf "${archive}" | head -20 | sed 's|/.*||' | sort -u | wc -l)"
-        if [[ "${root_count}" -eq 1 ]]; then
-            tar -xzf "${archive}" -C "${INTEMA_INSTALL_DIR}" --strip-components=1
-        else
-            tar -xzf "${archive}" -C "${INTEMA_INSTALL_DIR}"
-        fi
-    fi
+    tar -xzf "${archive}" -C "${INTEMA_INSTALL_DIR}" --strip-components=1
 
     rm -rf "${temp_dir}"
     trap - EXIT
@@ -202,10 +190,10 @@ main() {
     # Remote installation
     if [[ -n "${INTEMA_BRANCH}" ]]; then
         log "Development mode: branch ${INTEMA_BRANCH}"
-        install_from_archive "$(branch_archive_url)" 1
+        install_from_archive "$(branch_archive_url)"
     else
         log "Downloading latest release..."
-        install_from_archive "$(release_download_url)" 0
+        install_from_archive "$(release_download_url)"
     fi
 
     set_permissions
