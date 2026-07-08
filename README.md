@@ -20,10 +20,10 @@ sudo intema install web
 
 ### 2. Install Database
 
-Installs the latest PostgreSQL server, enables and starts the service. Ready to use.
+Installs the latest PostgreSQL server and sets the database root password. By default, it configures the default `postgres` root user, but you can specify a different name using the optional `--user` flag.
 
 ```bash
-sudo intema install db
+sudo intema install db --password=secretpass123
 ```
 
 ### 3. Create a New Site

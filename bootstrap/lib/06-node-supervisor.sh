@@ -12,5 +12,5 @@ fi
 
 if ! command -v pm2 >/dev/null 2>&1; then
     npm install -g pm2
-    pm2 startup systemd -u root --hp /root --no-interaction || true
+    pm2 startup systemd -u root --hp /root || true
 fi
