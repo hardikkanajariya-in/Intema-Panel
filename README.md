@@ -54,7 +54,28 @@ Creates a PostgreSQL database with a dedicated user and proper isolation.
 sudo intema new database --name=mydb --user=myuser --password=mypassword
 ```
 
-### 5. Health Check
+### 5. Secure VPS
+
+Applies production security hardening in one command — no interaction needed.
+
+```bash
+sudo intema secure
+```
+
+**What it configures:**
+
+| Area | Details |
+|------|---------|
+| SSH | Disables root login, limits auth tries to 3, keeps agent/TCP forwarding for dev workflows |
+| Passwords | Disables password auth (only if SSH keys detected — prevents lockout) |
+| Firewall | UFW with deny-all incoming, allows only SSH + HTTP + HTTPS |
+| Fail2ban | Jails for SSH brute force + Nginx bad bots + HTTP auth attacks |
+| Kernel | SYN flood protection, IP spoofing, ICMP hardening, disabled source routing |
+| Shared memory | Mounted with `noexec` and `nosuid` |
+| Protocols | Disables unused protocols (dccp, sctp, rds, tipc) |
+| Nginx | Security headers (X-Frame-Options, X-Content-Type-Options, etc.), hides version |
+
+### 6. Health Check
 
 ```bash
 sudo intema doctor

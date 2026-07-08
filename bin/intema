@@ -20,6 +20,7 @@ Commands:
   install db                 Install PostgreSQL server
   new --domain=DOMAIN --plt=PLATFORM   Create a new site with Nginx + SSL
   new database --name=NAME --user=USER --password=PASS   Create a PostgreSQL database
+  secure                     Harden VPS security (SSH, firewall, fail2ban, auto-updates)
   doctor                     Run system health checks
 
 Options:
@@ -39,6 +40,7 @@ Examples:
   sudo intema new --domain=api.example.com --plt=nestjs --port=4000
   sudo intema new --domain=app.example.com --plt=laravel
   sudo intema new database --name=mydb --user=myuser --password=secretpass123
+  sudo intema secure
 EOF
 }
 
@@ -144,6 +146,11 @@ cmd_doctor() {
     bash "${ROOT_DIR}/bootstrap/lib/doctor.sh"
 }
 
+cmd_secure() {
+    require_root
+    bash "${ROOT_DIR}/bootstrap/lib/secure.sh"
+}
+
 # --- Main dispatcher ---
 case "${1:-}" in
     install)
@@ -156,6 +163,9 @@ case "${1:-}" in
         ;;
     doctor)
         cmd_doctor
+        ;;
+    secure)
+        cmd_secure
         ;;
     -v | --version)
         echo "intema ${VERSION}"
