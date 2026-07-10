@@ -152,7 +152,7 @@ if certbot --nginx -d "${DOMAIN}" --non-interactive --agree-tos --register-unsaf
     success "SSL certificate installed for ${DOMAIN}"
 else
     warn "Certbot failed. Site is accessible via HTTP. You can retry SSL later with:"
-    warn "  sudo certbot --nginx -d ${DOMAIN}"
+    warn "  sudo intema ssl --domain=${DOMAIN}"
 fi
 
 systemctl reload nginx

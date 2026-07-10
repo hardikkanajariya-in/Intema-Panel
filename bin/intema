@@ -20,6 +20,8 @@ Commands:
   install db --password=PASS [--user=USER] [--domain=DOMAIN]   Install PostgreSQL and set root password & domain
   new --domain=DOMAIN --plt=PLATFORM   Create a new site with Nginx + SSL
   new database --name=NAME --user=USER --password=PASS   Create a PostgreSQL database
+  delete database --name=NAME  Delete a PostgreSQL database
+  ssl --domain=DOMAIN        Obtain/retry SSL certificate for a domain
   db:on                      Enable public network access to PostgreSQL (opens port 5432)
   db:off                     Disable public network access to PostgreSQL (closes port 5432)
   secure                     Harden VPS security (SSH, firewall, fail2ban, auto-updates)
@@ -164,6 +166,65 @@ cmd_new_database() {
     bash "${ROOT_DIR}/bootstrap/lib/new-database.sh"
 }
 
+cmd_delete() {
+    local first_arg="${1:-}"
+
+    if [[ "${first_arg}" == "database" ]]; then
+        shift
+        require_root
+        cmd_delete_database "$@"
+        return
+    fi
+
+    error "Unknown delete target: ${first_arg}. Use 'intema delete database'."
+}
+
+cmd_delete_database() {
+    local db_name=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --name=*) db_name="${1#*=}" ;;
+            --name) shift; db_name="${1:-}" ;;
+            *) error "Unknown option: $1" ;;
+        esac
+        shift
+    done
+
+    if [[ -z "${db_name}" ]]; then
+        error "Missing required option --name. Usage: intema delete database --name=mydb"
+    fi
+
+    export INTEMA_DB_NAME="${db_name}"
+    bash "${ROOT_DIR}/bootstrap/lib/delete-database.sh"
+}
+
+cmd_ssl() {
+    local domain=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --domain=*) domain="${1#*=}" ;;
+            --domain) shift; domain="${1:-}" ;;
+            *) error "Unknown option: $1" ;;
+        esac
+        shift
+    done
+
+    if [[ -z "${domain}" ]]; then
+        error "Missing --domain. Usage: intema ssl --domain=example.com"
+    fi
+
+    require_root
+    log "Attempting to obtain SSL certificate for ${domain}..."
+    if certbot --nginx -d "${domain}"; then
+        success "SSL certificate successfully configured for ${domain}"
+        systemctl reload nginx
+    else
+        error "Failed to obtain SSL certificate for ${domain}"
+    fi
+}
+
 cmd_doctor() {
     bash "${ROOT_DIR}/bootstrap/lib/doctor.sh"
 }
@@ -210,6 +271,14 @@ case "${1:-}" in
     new)
         shift
         cmd_new "$@"
+        ;;
+    delete)
+        shift
+        cmd_delete "$@"
+        ;;
+    ssl)
+        shift
+        cmd_ssl "$@"
         ;;
     doctor)
         cmd_doctor
